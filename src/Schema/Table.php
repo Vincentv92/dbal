@@ -14,10 +14,14 @@ use Doctrine\DBAL\Schema\Exception\InvalidTableName;
 use Doctrine\DBAL\Schema\Exception\PrimaryKeyAlreadyExists;
 use Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\Deprecations\Deprecation;
 use LogicException;
 
 use function array_merge;
 use function array_values;
+use function count;
+use function implode;
+use function in_array;
 use function preg_match;
 use function sprintf;
 use function strtolower;
@@ -280,10 +284,7 @@ class Table extends AbstractAsset
         return $this->renamedColumns;
     }
 
-    /**
-     * @throws LogicException
-     * @throws SchemaException
-     */
+    /** @throws LogicException */
     final public function renameColumn(string $oldName, string $newName): Column
     {
         $oldName = $this->normalizeIdentifier($oldName);
@@ -301,6 +302,10 @@ class Table extends AbstractAsset
         $column->_setName($newName);
         unset($this->_columns[$oldName]);
         $this->_addColumn($column);
+
+        $this->renameColumnInIndexes($oldName, $newName);
+        $this->renameColumnInForeignKeyConstraints($oldName, $newName);
+        $this->renameColumnInUniqueConstraints($oldName, $newName);
 
         // If a column is renamed multiple times, we only want to know the original and last new name
         if (isset($this->renamedColumns[$oldName])) {
@@ -331,6 +336,30 @@ class Table extends AbstractAsset
     public function dropColumn(string $name): self
     {
         $name = $this->normalizeIdentifier($name);
+
+        $foreignKeyConstraintNames = $this->getForeignKeyConstraintNamesByLocalColumnName($name);
+        $uniqueConstraintNames     = $this->getUniqueConstraintNamesByColumnName($name);
+
+        if (count($foreignKeyConstraintNames) > 0 || count($uniqueConstraintNames) > 0) {
+            $constraints = [];
+
+            if (count($foreignKeyConstraintNames) > 0) {
+                $constraints[] = 'foreign key constraints: ' . implode(', ', $foreignKeyConstraintNames);
+            }
+
+            if (count($uniqueConstraintNames) > 0) {
+                $constraints[] = 'unique constraints: ' . implode(', ', $uniqueConstraintNames);
+            }
+
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/pull/6559',
+                'Dropping columns referenced by constraints is deprecated.'
+                    . ' Column %s is used by the following constraints: %s ',
+                $name,
+                implode('; ', $constraints),
+            );
+        }
 
         unset($this->_columns[$name]);
 
@@ -409,8 +438,24 @@ class Table extends AbstractAsset
 
     /**
      * Removes the foreign key constraint with the given name.
+     *
+     * @deprecated Use {@link dropForeignKey()} instead.
      */
     public function removeForeignKey(string $name): void
+    {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/6560',
+            'Table::removeForeignKey() is deprecated. Use Table::removeForeignKey() instead.',
+        );
+
+        $this->dropForeignKey($name);
+    }
+
+    /**
+     * Drops the foreign key constraint with the given name.
+     */
+    public function dropForeignKey(string $name): void
     {
         $name = $this->normalizeIdentifier($name);
 
@@ -447,8 +492,24 @@ class Table extends AbstractAsset
 
     /**
      * Removes the unique constraint with the given name.
+     *
+     * @deprecated Use {@link dropUniqueConstraint()} instead.
      */
     public function removeUniqueConstraint(string $name): void
+    {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/6560',
+            'Table::removeUniqueConstraint() is deprecated. Use Table::dropUniqueConstraint() instead.',
+        );
+
+        $this->dropUniqueConstraint($name);
+    }
+
+    /**
+     * Drops the unique constraint with the given name.
+     */
+    public function dropUniqueConstraint(string $name): void
     {
         $name = $this->normalizeIdentifier($name);
 
@@ -799,5 +860,121 @@ class Table extends AbstractAsset
         }
 
         return new Index($indexName, $columns, $isUnique, $isPrimary, $flags, $options);
+    }
+
+    private function renameColumnInIndexes(string $oldName, string $newName): void
+    {
+        foreach ($this->_indexes as $key => $index) {
+            $modified = false;
+            $columns  = [];
+            foreach ($index->getColumns() as $columnName) {
+                if ($columnName === $oldName) {
+                    $columns[] = $newName;
+                    $modified  = true;
+                } else {
+                    $columns[] = $columnName;
+                }
+            }
+
+            if (! $modified) {
+                continue;
+            }
+
+            $this->_indexes[$key] = new Index(
+                $index->getName(),
+                $columns,
+                $index->isUnique(),
+                $index->isPrimary(),
+                $index->getFlags(),
+                $index->getOptions(),
+            );
+        }
+    }
+
+    private function renameColumnInForeignKeyConstraints(string $oldName, string $newName): void
+    {
+        foreach ($this->_fkConstraints as $key => $constraint) {
+            $modified     = false;
+            $localColumns = [];
+            foreach ($constraint->getLocalColumns() as $columnName) {
+                if ($columnName === $oldName) {
+                    $localColumns[] = $newName;
+                    $modified       = true;
+                } else {
+                    $localColumns[] = $columnName;
+                }
+            }
+
+            if (! $modified) {
+                continue;
+            }
+
+            $this->_fkConstraints[$key] = new ForeignKeyConstraint(
+                $localColumns,
+                $constraint->getForeignTableName(),
+                $constraint->getForeignColumns(),
+                $constraint->getName(),
+                $constraint->getOptions(),
+            );
+        }
+    }
+
+    private function renameColumnInUniqueConstraints(string $oldName, string $newName): void
+    {
+        foreach ($this->uniqueConstraints as $key => $constraint) {
+            $modified = false;
+            $columns  = [];
+            foreach ($constraint->getColumns() as $columnName) {
+                if ($columnName === $oldName) {
+                    $columns[] = $newName;
+                    $modified  = true;
+                } else {
+                    $columns[] = $columnName;
+                }
+            }
+
+            if (! $modified) {
+                continue;
+            }
+
+            $this->uniqueConstraints[$key] = new UniqueConstraint(
+                $constraint->getName(),
+                $columns,
+                $constraint->getFlags(),
+                $constraint->getOptions(),
+            );
+        }
+    }
+
+    /** @return list<string> */
+    private function getForeignKeyConstraintNamesByLocalColumnName(string $columnName): array
+    {
+        $names = [];
+
+        foreach ($this->_fkConstraints as $name => $constraint) {
+            if (! in_array($columnName, $constraint->getLocalColumns(), true)) {
+                continue;
+            }
+
+            $names[] = $name;
+        }
+
+        return $names;
+    }
+
+    /** @return list<string> */
+    private function getUniqueConstraintNamesByColumnName(string $columnName): array
+    {
+        $names = [];
+
+        foreach ($this->uniqueConstraints as $name => $constraint) {
+            if (! in_array($columnName, $constraint->getColumns(), true)) {
+                continue;
+            }
+
+            $names[] = $name;
+        }
+
+        return $names;
     }
 }
