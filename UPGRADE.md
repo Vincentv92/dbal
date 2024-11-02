@@ -19,6 +19,17 @@ all drivers and middleware.
 * Upgrade to MySQL 8.0 or later.
 * Upgrade to Postgres 12 or later.
 
+# Upgrade to 4.3
+
+## Deprecated dropping columns referenced by constraints
+
+Dropping columns that are referenced by constraints is deprecated. The constraints should be dropped first.
+
+## Deprecated `Table::removeForeignKey()` and `::removeUniqueConstraint()`
+
+The usage of `Table::removeForeignKey()` and `::removeUniqueConstraint()` is deprecated. Use `Table::dropForeignKey()`
+and `::dropUniqueConstraint()` respectively instead.
+
 # Upgrade to 4.2
 
 ## Support for new PDO subclasses on PHP 8.4
