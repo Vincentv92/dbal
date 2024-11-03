@@ -8,6 +8,10 @@ awareness about deprecated code.
 
 # Upgrade to 5.0
 
+## BC BREAK: Removed `Table::removeForeignKey()` and `::removeUniqueConstraint()`
+
+The `Table::removeForeignKey()` and `::removeUniqueConstraint()` have been removed.
+
 ## BC BREAK: Removed `AbstractPlatform` constants
 
 The `CREATE_INDEXES` and `CREATE_FOREIGNKEYS` constants have been removed from the `AbstractPlatform` class.

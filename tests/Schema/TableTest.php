@@ -855,7 +855,7 @@ class TableTest extends TestCase
 
         $table->dropColumn($assetName);
         $table->dropIndex($assetName);
-        $table->removeForeignKey($assetName);
+        $table->dropForeignKey($assetName);
 
         self::assertFalse($table->hasColumn($assetName));
         self::assertFalse($table->hasColumn('foo'));
@@ -918,25 +918,25 @@ class TableTest extends TestCase
         self::assertSame($uniqueConstraints[1], $constraints['fk_d87f7e0cda12812744761484']);
     }
 
-    public function testRemoveUniqueConstraint(): void
+    public function testDropUniqueConstraint(): void
     {
         $table = new Table('foo');
         $table->addColumn('bar', Types::INTEGER);
         $table->addUniqueConstraint(['bar'], 'unique_constraint');
 
-        $table->removeUniqueConstraint('unique_constraint');
+        $table->dropUniqueConstraint('unique_constraint');
 
         self::assertFalse($table->hasUniqueConstraint('unique_constraint'));
     }
 
-    public function testRemoveUniqueConstraintUnknownNameThrowsException(): void
+    public function testDropUniqueConstraintUnknownNameThrowsException(): void
     {
         $this->expectException(SchemaException::class);
 
         $table = new Table('foo');
         $table->addColumn('bar', Types::INTEGER);
 
-        $table->removeUniqueConstraint('unique_constraint');
+        $table->dropUniqueConstraint('unique_constraint');
     }
 
     public function testDropColumnWithForeignKeyConstraint(): void
