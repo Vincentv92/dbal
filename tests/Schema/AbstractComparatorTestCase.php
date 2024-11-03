@@ -244,7 +244,7 @@ abstract class AbstractComparatorTestCase extends TestCase
         self::assertCount(1, $tableDiff->getAddedForeignKeys());
     }
 
-    public function testTableRemoveForeignKey(): void
+    public function testTableDropForeignKey(): void
     {
         $tableForeign = new Table('bar');
         $tableForeign->addColumn('id', Types::INTEGER);
