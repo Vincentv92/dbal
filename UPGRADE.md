@@ -8,6 +8,28 @@ awareness about deprecated code.
 
 # Upgrade to 5.0
 
+## BC BREAK: Removed Reserved Keyword Lists
+
+The following components have been removed:
+
+1. The `KeywordList` class and all its subclasses.
+2. The methods `AbstractPlatform::createReservedKeywordsList()` and `::getReservedKeywordsList()`.
+3. The `AbstractPlatform::$_keywords` property.
+
+Prior to this change, DBAL would automatically quote reserved keywords and, as a side effect, preserve their case
+on platforms that adhere to the SQL-92 standard (i.e., preserve lowercase identifiers on Oracle and IBM DB2,
+and uppercase ones on PostgreSQL).
+
+With this change, DBAL will:
+1. Normalize the case of unquoted identifiers to match the behavior of the target database platform:
+    - Oracle and IBM DB2 – uppercase.
+    - PostgreSQL – lowercase.
+    - All other platforms – no modification.
+2. Consistently quote all identifiers in SQL, regardless of whether they are keywords or not.
+
+To preserve lowercase identifiers on Oracle and IBM DB2 or uppercase identifiers on PostgreSQL, quote the identifiers
+explicitly.
+
 ## BC BREAK: Removed `AbstractPlatform::quoteIdentifier()` and `Connection::quoteIdentifier()`
 
 The `AbstractPlatform::quoteIdentifier()` and `Connection::quoteIdentifier()` methods have been removed.

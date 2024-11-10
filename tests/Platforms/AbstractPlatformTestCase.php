@@ -322,13 +322,6 @@ abstract class AbstractPlatformTestCase extends TestCase
         }
     }
 
-    public function testKeywordList(): void
-    {
-        $keywordList = $this->platform->getReservedKeywordsList();
-
-        self::assertTrue($keywordList->isKeyword('table'));
-    }
-
     public function testQuotedColumnInPrimaryKeyPropagation(): void
     {
         $table = new Table('`quoted`');
