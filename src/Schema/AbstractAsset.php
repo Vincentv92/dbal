@@ -5,18 +5,15 @@ declare(strict_types=1);
 namespace Doctrine\DBAL\Schema;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Schema\Exception\InvalidObjectName;
 use Doctrine\DBAL\Schema\Name\Parser;
 use Doctrine\DBAL\Schema\Name\Parser\Identifier;
-use Doctrine\Deprecations\Deprecation;
 
 use function array_map;
 use function count;
 use function crc32;
 use function dechex;
-use function explode;
 use function implode;
-use function sprintf;
-use function str_contains;
 use function str_replace;
 use function strtolower;
 use function strtoupper;
@@ -43,44 +40,18 @@ abstract class AbstractAsset
     /** @var list<Identifier> */
     private array $identifiers = [];
 
-    private bool $validateFuture = false;
-
     /**
      * Sets the name of this asset.
      */
     protected function _setName(string $name): void
     {
-        $input = $name;
-
-        if ($this->isIdentifierQuoted($name)) {
-            $this->_quoted = true;
-            $name          = $this->trimQuotes($name);
-        }
-
-        if (str_contains($name, '.')) {
-            $parts            = explode('.', $name);
-            $this->_namespace = $parts[0];
-            $name             = $parts[1];
-        }
-
-        $this->_name = $name;
-
-        $this->validateFuture = false;
-
-        if ($input !== '') {
+        if ($name !== '') {
             $parser = new Parser();
 
             try {
-                $identifiers = $parser->parse($input);
+                $identifiers = $parser->parse($name);
             } catch (Parser\Exception $e) {
-                Deprecation::trigger(
-                    'doctrine/dbal',
-                    'https://github.com/doctrine/dbal/pull/6592',
-                    'Unable to parse object name: %s.',
-                    $e->getMessage(),
-                );
-
-                return;
+                throw InvalidObjectName::fromParserException($name, $e);
             }
         } else {
             $identifiers = [];
@@ -88,6 +59,9 @@ abstract class AbstractAsset
 
         switch (count($identifiers)) {
             case 0:
+                $this->_name       = '';
+                $this->_quoted     = false;
+                $this->_namespace  = null;
                 $this->identifiers = [];
 
                 return;
@@ -102,43 +76,13 @@ abstract class AbstractAsset
                 break;
 
             default:
-                Deprecation::trigger(
-                    'doctrine/dbal',
-                    'https://github.com/doctrine/dbal/pull/6592',
-                    'An object name may consist of at most 2 identifiers (<namespace>.<name>), %d given.',
-                    count($identifiers),
-                );
-
-                return;
+                throw InvalidObjectName::tooManyQualifiers($name, count($identifiers) - 1);
         }
 
-        $this->identifiers    = $identifiers;
-        $this->validateFuture = true;
-
-        $futureName      = $name->getValue();
-        $futureNamespace = $namespace?->getValue();
-
-        if ($this->_name !== $futureName) {
-            Deprecation::trigger(
-                'doctrine/dbal',
-                'https://github.com/doctrine/dbal/pull/6592',
-                'Instead of "%s", this name will be interpreted as "%s" in 5.0',
-                $this->_name,
-                $futureName,
-            );
-        }
-
-        if ($this->_namespace === $futureNamespace) {
-            return;
-        }
-
-        Deprecation::trigger(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/6592',
-            'Instead of %s, the namespace in this name will be interpreted as %s in 5.0.',
-            $this->_namespace !== null ? sprintf('"%s"', $this->_namespace) : 'null',
-            $futureNamespace !== null ? sprintf('"%s"', $futureNamespace) : 'null',
-        );
+        $this->_name       = $name->getValue();
+        $this->_quoted     = $name->isQuoted();
+        $this->_namespace  = $namespace?->getValue();
+        $this->identifiers = $identifiers;
     }
 
     /**
@@ -210,53 +154,22 @@ abstract class AbstractAsset
     }
 
     /**
-     * Gets the quoted representation of this asset but only if it was defined with one. Otherwise
-     * return the plain unquoted value as inserted.
+     * Returns the quoted representation of this asset's name. If the name is unquoted, it is normalized according to
+     * the platform's unquoted name normalization rules.
      */
     public function getQuotedName(AbstractPlatform $platform): string
     {
-        $keywords = $platform->getReservedKeywordsList();
-        $parts    = $normalizedParts = [];
+        $parts = array_map(static function (Identifier $identifier) use ($platform): string {
+            $value = $identifier->getValue();
 
-        foreach (explode('.', $this->getName()) as $identifier) {
-            $isQuoted = $this->_quoted || $keywords->isKeyword($identifier);
-
-            if (! $isQuoted) {
-                $parts[]           = $identifier;
-                $normalizedParts[] = $platform->normalizeUnquotedIdentifier($identifier);
-            } else {
-                $parts[]           = $platform->quoteSingleIdentifier($identifier);
-                $normalizedParts[] = $identifier;
+            if (! $identifier->isQuoted()) {
+                $value = $platform->normalizeUnquotedIdentifier($value);
             }
-        }
 
-        $name = implode('.', $parts);
+            return $platform->quoteSingleIdentifier($value);
+        }, $this->identifiers);
 
-        if ($this->validateFuture) {
-            $futureParts = array_map(static function (Identifier $identifier) use ($platform): string {
-                $value = $identifier->getValue();
-
-                if (! $identifier->isQuoted()) {
-                    $value = $platform->normalizeUnquotedIdentifier($value);
-                }
-
-                return $value;
-            }, $this->identifiers);
-
-            if ($normalizedParts !== $futureParts) {
-                Deprecation::trigger(
-                    'doctrine/dbal',
-                    'https://github.com/doctrine/dbal/pull/6592',
-                    'Relying on implicitly quoted identifiers preserving their original case is deprecated. '
-                        . 'The current name %s will become %s in 5.0. '
-                        . 'Please quote the name if the case needs to be preserved.',
-                    $name,
-                    implode('.', array_map([$platform, 'quoteSingleIdentifier'], $futureParts)),
-                );
-            }
-        }
-
-        return $name;
+        return implode('.', $parts);
     }
 
     /**

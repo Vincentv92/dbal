@@ -43,7 +43,7 @@ class MySQLInheritCharsetTest extends TestCase
         // no options
         $table = new Table('foobar', [new Column('aa', Type::getType(Types::INTEGER))]);
         self::assertSame(
-            ['CREATE TABLE foobar (aa INT NOT NULL)'],
+            ['CREATE TABLE `foobar` (`aa` INT NOT NULL)'],
             $platform->getCreateTableSQL($table),
         );
 
@@ -51,7 +51,7 @@ class MySQLInheritCharsetTest extends TestCase
         $table = new Table('foobar', [new Column('aa', Type::getType(Types::INTEGER))]);
         $table->addOption('charset', 'utf8');
         self::assertSame(
-            ['CREATE TABLE foobar (aa INT NOT NULL) DEFAULT CHARACTER SET utf8'],
+            ['CREATE TABLE `foobar` (`aa` INT NOT NULL) DEFAULT CHARACTER SET utf8'],
             $platform->getCreateTableSQL($table),
         );
     }

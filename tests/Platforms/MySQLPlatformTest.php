@@ -34,7 +34,7 @@ class MySQLPlatformTest extends AbstractMySQLPlatformTestCase
     /** @return string[] */
     protected function getAlterTableRenameIndexSQL(): array
     {
-        return ['ALTER TABLE mytable RENAME INDEX idx_foo TO idx_bar'];
+        return ['ALTER TABLE `mytable` RENAME INDEX `idx_foo` TO `idx_bar`'];
     }
 
     /** @return string[] */
@@ -49,7 +49,7 @@ class MySQLPlatformTest extends AbstractMySQLPlatformTestCase
     /** @return string[] */
     protected function getAlterTableRenameIndexInSchemaSQL(): array
     {
-        return ['ALTER TABLE myschema.mytable RENAME INDEX idx_foo TO idx_bar'];
+        return ['ALTER TABLE `myschema`.`mytable` RENAME INDEX `idx_foo` TO `idx_bar`'];
     }
 
     /** @return string[] */
@@ -66,7 +66,7 @@ class MySQLPlatformTest extends AbstractMySQLPlatformTestCase
      */
     protected function getGeneratesAlterTableRenameIndexUsedByForeignKeySQL(): array
     {
-        return ['ALTER TABLE mytable RENAME INDEX idx_foo TO idx_foo_renamed'];
+        return ['ALTER TABLE `mytable` RENAME INDEX `idx_foo` TO `idx_foo_renamed`'];
     }
 
     public function testHasCorrectDefaultTransactionIsolationLevel(): void

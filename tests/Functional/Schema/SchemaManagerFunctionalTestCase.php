@@ -1293,7 +1293,7 @@ abstract class SchemaManagerFunctionalTestCase extends FunctionalTestCase
     {
         $this->createReservedKeywordTables();
 
-        $user = $this->schemaManager->introspectTable('"user"');
+        $user = $this->schemaManager->introspectTable('user');
         self::assertCount(2, $user->getColumns());
         self::assertCount(2, $user->getIndexes());
         self::assertCount(1, $user->getForeignKeys());
@@ -1314,11 +1314,6 @@ abstract class SchemaManagerFunctionalTestCase extends FunctionalTestCase
 
     private function createReservedKeywordTables(): void
     {
-        $platform = $this->connection->getDatabasePlatform();
-
-        $this->dropTableIfExists($platform->quoteSingleIdentifier('user'));
-        $this->dropTableIfExists($platform->quoteSingleIdentifier('group'));
-
         $schema = new Schema();
 
         $user = $schema->createTable('user');
@@ -1330,6 +1325,11 @@ abstract class SchemaManagerFunctionalTestCase extends FunctionalTestCase
         $group = $schema->createTable('group');
         $group->addColumn('id', Types::INTEGER);
         $group->setPrimaryKey(['id']);
+
+        $platform = $this->connection->getDatabasePlatform();
+
+        $this->dropTableIfExists($user->getQuotedName($platform));
+        $this->dropTableIfExists($group->getQuotedName($platform));
 
         $schemaManager = $this->connection->createSchemaManager();
         $schemaManager->createSchemaObjects($schema);

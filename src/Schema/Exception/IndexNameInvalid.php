@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Doctrine\DBAL\Schema\Exception;
 
-use Doctrine\DBAL\Schema\SchemaException;
-use InvalidArgumentException;
-
 use function sprintf;
 
 /** @psalm-immutable */
-final class IndexNameInvalid extends InvalidArgumentException implements SchemaException
+final class IndexNameInvalid extends InvalidObjectName
 {
     public static function new(string $indexName): self
     {
