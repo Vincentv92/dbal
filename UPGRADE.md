@@ -29,6 +29,11 @@ all drivers and middleware.
 
 # Upgrade to 4.3
 
+## Deprecated `AbstractPlatform::quoteIdentifier()` and `Connection::quoteIdentifier()`
+
+The `AbstractPlatform::quoteIdentifier()` and `Connection::quoteIdentifier()` methods have been deprecated.
+Use the corresponding `quoteSingleIdentifier()` method individually for each part of a qualified name instead.
+
 ## Deprecated dropping columns referenced by constraints
 
 Dropping columns that are referenced by constraints is deprecated. The constraints should be dropped first.
