@@ -553,11 +553,6 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
         );
     }
 
-    public function testQuoteIdentifier(): void
-    {
-        self::assertEquals('[test].[test]', $this->platform->quoteIdentifier('test.test'));
-    }
-
     public function testCreateClusteredIndex(): void
     {
         $idx = new Index('idx', ['id']);

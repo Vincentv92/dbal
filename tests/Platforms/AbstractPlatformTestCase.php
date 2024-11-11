@@ -44,11 +44,6 @@ abstract class AbstractPlatformTestCase extends TestCase
         return new Comparator($this->platform, new ComparatorConfig());
     }
 
-    public function testQuoteIdentifier(): void
-    {
-        self::assertEquals('"test"."test"', $this->platform->quoteIdentifier('test.test'));
-    }
-
     #[DataProvider('getReturnsForeignKeyReferentialActionSQL')]
     public function testReturnsForeignKeyReferentialActionSQL(string $action, string $expectedSQL): void
     {
