@@ -36,7 +36,6 @@ use Doctrine\DBAL\TransactionIsolationLevel;
 use Doctrine\DBAL\Types;
 use Doctrine\DBAL\Types\Exception\TypeNotFound;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\Deprecations\Deprecation;
 
 use function addcslashes;
 use function array_map;
@@ -45,7 +44,6 @@ use function array_unique;
 use function array_values;
 use function assert;
 use function count;
-use function explode;
 use function implode;
 use function in_array;
 use function is_array;
@@ -58,7 +56,6 @@ use function mb_strlen;
 use function preg_quote;
 use function preg_replace;
 use function sprintf;
-use function str_contains;
 use function str_replace;
 use function strlen;
 use function strtolower;
@@ -1177,48 +1174,11 @@ abstract class AbstractPlatform
     }
 
     /**
-     * Quotes a string so that it can be safely used as a table or column name,
-     * even if it is a reserved word of the platform. This also detects identifier
-     * chains separated by dot and quotes them independently.
-     *
-     * NOTE: Just because you CAN use quoted identifiers doesn't mean
-     * you SHOULD use them. In general, they end up causing way more
-     * problems than they solve.
-     *
-     * @deprecated Use {@link quoteSingleIdentifier()} individually for each part of a qualified name instead.
-     *
-     * @param string $identifier The identifier name to be quoted.
-     *
-     * @return string The quoted identifier string.
+     * Quotes a string so that it can be safely used as an identifier in SQL.
      */
-    public function quoteIdentifier(string $identifier): string
+    public function quoteSingleIdentifier(string $identifier): string
     {
-        Deprecation::trigger(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/6590',
-            'Use quoteSingleIdentifier() individually for each part of a qualified name instead.',
-            __METHOD__,
-        );
-
-        if (str_contains($identifier, '.')) {
-            $parts = array_map($this->quoteSingleIdentifier(...), explode('.', $identifier));
-
-            return implode('.', $parts);
-        }
-
-        return $this->quoteSingleIdentifier($identifier);
-    }
-
-    /**
-     * Quotes a single identifier (no dot chain separation).
-     *
-     * @param string $str The identifier name to be quoted.
-     *
-     * @return string The quoted identifier string.
-     */
-    public function quoteSingleIdentifier(string $str): string
-    {
-        return '"' . str_replace('"', '""', $str) . '"';
+        return '"' . str_replace('"', '""', $identifier) . '"';
     }
 
     /**

@@ -681,11 +681,6 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         );
     }
 
-    public function testQuoteIdentifier(): void
-    {
-        self::assertEquals('`test`.`test`', $this->platform->quoteIdentifier('test.test'));
-    }
-
     protected function createComparator(): Comparator
     {
         return new MySQL\Comparator(

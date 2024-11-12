@@ -8,6 +8,10 @@ awareness about deprecated code.
 
 # Upgrade to 5.0
 
+## BC BREAK: Removed `AbstractPlatform::quoteIdentifier()` and `Connection::quoteIdentifier()`
+
+The `AbstractPlatform::quoteIdentifier()` and `Connection::quoteIdentifier()` methods have been removed.
+
 ## BC BREAK: Removed `Table::removeForeignKey()` and `::removeUniqueConstraint()`
 
 The `Table::removeForeignKey()` and `::removeUniqueConstraint()` have been removed.
