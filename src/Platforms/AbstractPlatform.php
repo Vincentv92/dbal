@@ -1210,15 +1210,11 @@ abstract class AbstractPlatform
     }
 
     /**
-     * Quotes a single identifier (no dot chain separation).
-     *
-     * @param string $str The identifier name to be quoted.
-     *
-     * @return string The quoted identifier string.
+     * Quotes a string so that it can be safely used as an identifier in SQL.
      */
-    public function quoteSingleIdentifier(string $str): string
+    public function quoteSingleIdentifier(string $identifier): string
     {
-        return '"' . str_replace('"', '""', $str) . '"';
+        return '"' . str_replace('"', '""', $identifier) . '"';
     }
 
     /**

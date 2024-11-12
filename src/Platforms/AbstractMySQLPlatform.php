@@ -59,9 +59,9 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
         return $query;
     }
 
-    public function quoteSingleIdentifier(string $str): string
+    public function quoteSingleIdentifier(string $identifier): string
     {
-        return '`' . str_replace('`', '``', $str) . '`';
+        return '`' . str_replace('`', '``', $identifier) . '`';
     }
 
     public function getRegexpExpression(): string
