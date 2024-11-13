@@ -773,4 +773,9 @@ class PostgreSQLPlatform extends AbstractPlatform
     {
         return new PostgreSQLSchemaManager($connection, $this);
     }
+
+    public function normalizeUnquotedIdentifier(string $identifier): string
+    {
+        return strtolower($identifier);
+    }
 }

@@ -868,4 +868,9 @@ SQL;
 
         return $sql . ' WHERE ' . implode(' AND ', $conditions);
     }
+
+    public function normalizeUnquotedIdentifier(string $identifier): string
+    {
+        return $identifier;
+    }
 }
