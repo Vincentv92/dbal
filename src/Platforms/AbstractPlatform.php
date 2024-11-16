@@ -36,6 +36,7 @@ use Doctrine\DBAL\TransactionIsolationLevel;
 use Doctrine\DBAL\Types;
 use Doctrine\DBAL\Types\Exception\TypeNotFound;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\Deprecations\Deprecation;
 
 use function addcslashes;
 use function array_map;
@@ -75,6 +76,8 @@ abstract class AbstractPlatform
 
     /**
      * Holds the KeywordList instance for the current platform.
+     *
+     * @deprecated
      */
     protected ?KeywordList $_keywords = null;
 
@@ -2124,15 +2127,26 @@ abstract class AbstractPlatform
 
     /**
      * Returns the keyword list instance of this platform.
+     *
+     * @deprecated
      */
     final public function getReservedKeywordsList(): KeywordList
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/6607',
+            '%s is deprecated.',
+            __METHOD__,
+        );
+
         // Store the instance so it doesn't need to be generated on every request.
         return $this->_keywords ??= $this->createReservedKeywordsList();
     }
 
     /**
      * Creates an instance of the reserved keyword list of this platform.
+     *
+     * @deprecated
      */
     abstract protected function createReservedKeywordsList(): KeywordList;
 
