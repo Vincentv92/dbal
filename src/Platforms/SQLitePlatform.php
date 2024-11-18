@@ -7,8 +7,6 @@ namespace Doctrine\DBAL\Platforms;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Platforms\Exception\NotSupported;
-use Doctrine\DBAL\Platforms\Keywords\KeywordList;
-use Doctrine\DBAL\Platforms\Keywords\SQLiteKeywords;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Exception\ColumnDoesNotExist;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
@@ -21,7 +19,6 @@ use Doctrine\DBAL\SQL\Builder\DefaultSelectSQLBuilder;
 use Doctrine\DBAL\SQL\Builder\SelectSQLBuilder;
 use Doctrine\DBAL\TransactionIsolationLevel;
 use Doctrine\DBAL\Types;
-use Doctrine\Deprecations\Deprecation;
 use InvalidArgumentException;
 
 use function array_combine;
@@ -472,19 +469,6 @@ class SQLitePlatform extends AbstractPlatform
             'varchar'          => 'string',
             'varchar2'         => 'string',
         ];
-    }
-
-    /** @deprecated */
-    protected function createReservedKeywordsList(): KeywordList
-    {
-        Deprecation::triggerIfCalledFromOutside(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/6607',
-            '%s is deprecated.',
-            __METHOD__,
-        );
-
-        return new SQLiteKeywords();
     }
 
     /**

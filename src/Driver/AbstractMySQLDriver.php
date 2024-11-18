@@ -12,7 +12,6 @@ use Doctrine\DBAL\Platforms\Exception\InvalidPlatformVersion;
 use Doctrine\DBAL\Platforms\MariaDB1010Platform;
 use Doctrine\DBAL\Platforms\MariaDB1060Platform;
 use Doctrine\DBAL\Platforms\MariaDBPlatform;
-use Doctrine\DBAL\Platforms\MySQL84Platform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\ServerVersionProvider;
 
@@ -44,10 +43,6 @@ abstract class AbstractMySQLDriver implements Driver
             }
 
             return new MariaDBPlatform();
-        }
-
-        if (version_compare($version, '8.4.0', '>=')) {
-            return new MySQL84Platform();
         }
 
         return new MySQLPlatform();

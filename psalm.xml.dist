@@ -42,24 +42,6 @@
                 <file name="src/Driver/OCI8/ConvertPositionalToNamedPlaceholders.php"/>
             </errorLevel>
         </ConflictingReferenceConstraint>
-        <DeprecatedClass>
-            <errorLevel type="suppress">
-                <!--
-                    https://github.com/doctrine/dbal/pull/6607
-                    TODO: remove in 5.0.0
-                -->
-                <referencedClass name="Doctrine\DBAL\Platforms\Keywords\KeywordList" />
-                <referencedClass name="Doctrine\DBAL\Platforms\Keywords\DB2Keywords" />
-                <referencedClass name="Doctrine\DBAL\Platforms\Keywords\MariaDBKeywords" />
-                <referencedClass name="Doctrine\DBAL\Platforms\Keywords\MySQLKeywords" />
-                <referencedClass name="Doctrine\DBAL\Platforms\Keywords\MySQL84Keywords" />
-                <referencedClass name="Doctrine\DBAL\Platforms\Keywords\PostgreSQLKeywords" />
-                <referencedClass name="Doctrine\DBAL\Platforms\Keywords\OracleKeywords" />
-                <referencedClass name="Doctrine\DBAL\Platforms\Keywords\SQLiteKeywords" />
-                <referencedClass name="Doctrine\DBAL\Platforms\Keywords\SQLServerKeywords" />
-                <referencedClass name="Doctrine\DBAL\Platforms\MySQL84Platform" />
-            </errorLevel>
-        </DeprecatedClass>
         <DeprecatedMethod>
             <errorLevel type="suppress">
                 <!--
@@ -73,24 +55,8 @@
 
                 <!-- TODO for PHPUnit 11 -->
                 <referencedMethod name="PHPUnit\Framework\TestCase::iniSet"/>
-
-                <!--
-                    https://github.com/doctrine/dbal/pull/6607
-                    TODO: remove in 5.0.0
-                -->
-                <referencedMethod name="Doctrine\DBAL\Platforms\AbstractPlatform::createReservedKeywordsList" />
-                <referencedMethod name="Doctrine\DBAL\Platforms\AbstractPlatform::getReservedKeywordsList" />
             </errorLevel>
         </DeprecatedMethod>
-        <DeprecatedProperty>
-            <errorLevel type="suppress">
-                <!--
-                    https://github.com/doctrine/dbal/pull/6607
-                    TODO: remove in 5.0.0
-                -->
-                <referencedProperty name="Doctrine\DBAL\Platforms\AbstractPlatform::$_keywords" />
-            </errorLevel>
-        </DeprecatedProperty>
         <DocblockTypeContradiction>
             <errorLevel type="suppress">
                 <!--

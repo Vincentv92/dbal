@@ -671,8 +671,7 @@ abstract class AbstractSchemaManager
         foreach ($tableColumns as $tableColumn) {
             $column = $this->_getPortableTableColumnDefinition($tableColumn);
 
-            $name        = strtolower($column->getQuotedName($this->platform));
-            $list[$name] = $column;
+            $list[strtolower($column->getName())] = $column;
         }
 
         return $list;

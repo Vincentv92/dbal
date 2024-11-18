@@ -596,11 +596,6 @@ SQL;
         $metadataTable = new Table('table_with_custom_type');
         $metadataTable->addColumn('col1', 'custom_type');
 
-        self::assertSame(
-            ['CREATE TABLE table_with_custom_type (col1 INT NOT NULL)'],
-            $this->connection->getDatabasePlatform()->getCreateTableSQL($metadataTable),
-        );
-
         $this->connection->executeStatement('DROP TABLE IF EXISTS table_with_custom_type');
 
         $this->connection->executeStatement('CREATE TABLE table_with_custom_type (col1 VARCHAR(255) NOT NULL)');
@@ -609,10 +604,8 @@ SQL;
         $comparator = $this->schemaManager->createComparator();
         $tablesDiff = $comparator->compareTables($onlineTable, $metadataTable);
 
-        self::assertSame(
-            ['ALTER TABLE table_with_custom_type CHANGE col1 col1 INT NOT NULL'],
-            $this->connection->getDatabasePlatform()->getAlterTableSQL($tablesDiff),
-            ' The column should be changed from VARCAHR TO INT',
-        );
+        $columns = $tablesDiff->getChangedColumns();
+        self::assertArrayHasKey('col1', $columns);
+        self::assertInstanceOf(CustomType::class, $columns['col1']->getNewColumn()->getType());
     }
 }

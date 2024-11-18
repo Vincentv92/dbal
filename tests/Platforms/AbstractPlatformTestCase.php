@@ -322,13 +322,6 @@ abstract class AbstractPlatformTestCase extends TestCase
         }
     }
 
-    public function testKeywordList(): void
-    {
-        $keywordList = $this->platform->getReservedKeywordsList();
-
-        self::assertTrue($keywordList->isKeyword('table'));
-    }
-
     public function testQuotedColumnInPrimaryKeyPropagation(): void
     {
         $table = new Table('`quoted`');
@@ -398,16 +391,16 @@ abstract class AbstractPlatformTestCase extends TestCase
             'FK_WITH_RESERVED_KEYWORD',
         );
 
-        // Foreign table with non-reserved keyword as name (does not need quotation).
+        // Foreign table with non-reserved keyword as name
         $foreignTable = new Table('foo');
 
-        // Foreign column with reserved keyword as name (needs quotation).
+        // Foreign column with reserved keyword as name
         $foreignTable->addColumn('create', Types::STRING);
 
-        // Foreign column with non-reserved keyword as name (does not need quotation).
+        // Foreign column with non-reserved keyword as name
         $foreignTable->addColumn('bar', Types::STRING);
 
-        // Foreign table with special character in name (needs quotation on some platforms, e.g. Sqlite).
+        // Foreign table with special character in name
         $foreignTable->addColumn('`foo-bar`', Types::STRING);
 
         $table->addForeignKeyConstraint(
@@ -519,7 +512,7 @@ abstract class AbstractPlatformTestCase extends TestCase
         ]);
 
         self::assertStringContainsString(
-            $this->platform->quoteSingleIdentifier('select'),
+            $this->platform->quoteSingleIdentifier($this->platform->normalizeUnquotedIdentifier('select')),
             implode(';', $this->platform->getAlterTableSQL($tableDiff)),
         );
     }
@@ -680,8 +673,8 @@ abstract class AbstractPlatformTestCase extends TestCase
     protected function getAlterTableRenameIndexSQL(): array
     {
         return [
-            'DROP INDEX idx_foo',
-            'CREATE INDEX idx_bar ON mytable (id)',
+            'DROP INDEX `idx_foo`',
+            'CREATE INDEX `idx_bar` ON mytable (`id`)',
         ];
     }
 
@@ -693,7 +686,7 @@ abstract class AbstractPlatformTestCase extends TestCase
 
         $tableDiff = new TableDiff($table, renamedIndexes: [
             'create' => new Index('select', ['id']),
-            '`foo`' => new Index('`bar`', ['id']),
+            'foo' => new Index('bar', ['id']),
         ]);
 
         self::assertSame(
@@ -744,7 +737,7 @@ abstract class AbstractPlatformTestCase extends TestCase
 
         $tableDiff = new TableDiff($table, renamedIndexes: [
             'create' => new Index('select', ['id']),
-            '`foo`' => new Index('`bar`', ['id']),
+            'foo' => new Index('bar', ['id']),
         ]);
 
         self::assertSame(
@@ -766,7 +759,7 @@ abstract class AbstractPlatformTestCase extends TestCase
 
     protected function getQuotedCommentOnColumnSQLWithoutQuoteCharacter(): string
     {
-        return "COMMENT ON COLUMN mytable.id IS 'This is a comment'";
+        return "COMMENT ON COLUMN \"MYTABLE\".\"ID\" IS 'This is a comment'";
     }
 
     public function testGetCommentOnColumnSQLWithoutQuoteCharacter(): void
@@ -779,7 +772,7 @@ abstract class AbstractPlatformTestCase extends TestCase
 
     protected function getQuotedCommentOnColumnSQLWithQuoteCharacter(): string
     {
-        return "COMMENT ON COLUMN mytable.id IS 'It''s a quote !'";
+        return "COMMENT ON COLUMN \"MYTABLE\".\"ID\" IS 'It''s a quote !'";
     }
 
     public function testGetCommentOnColumnSQLWithQuoteCharacter(): void

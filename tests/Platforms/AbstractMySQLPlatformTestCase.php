@@ -34,23 +34,23 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         $sql = $this->platform->getCreateTableSQL($table);
         self::assertEquals(
-            'CREATE TABLE Foo (Bar INT NOT NULL)',
+            'CREATE TABLE `Foo` (`Bar` INT NOT NULL)',
             array_shift($sql),
         );
     }
 
     public function getGenerateTableSql(): string
     {
-        return 'CREATE TABLE test (id INT AUTO_INCREMENT NOT NULL, test VARCHAR(255) DEFAULT NULL, '
-            . 'PRIMARY KEY(id))';
+        return 'CREATE TABLE `test` (`id` INT AUTO_INCREMENT NOT NULL, `test` VARCHAR(255) DEFAULT NULL, '
+            . 'PRIMARY KEY(`id`))';
     }
 
     /** @return string[] */
     public function getGenerateTableWithMultiColumnUniqueIndexSql(): array
     {
         return [
-            'CREATE TABLE test (foo VARCHAR(255) DEFAULT NULL, bar VARCHAR(255) DEFAULT NULL, '
-                . 'UNIQUE INDEX UNIQ_D87F7E0C8C73652176FF8CAA (foo, bar))',
+            'CREATE TABLE `test` (`foo` VARCHAR(255) DEFAULT NULL, `bar` VARCHAR(255) DEFAULT NULL, '
+                . 'UNIQUE INDEX `UNIQ_D87F7E0C8C73652176FF8CAA` (`foo`, `bar`))',
         ];
     }
 
@@ -122,17 +122,17 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
     public function getGenerateIndexSql(): string
     {
-        return 'CREATE INDEX my_idx ON mytable (user_name, last_login)';
+        return 'CREATE INDEX `my_idx` ON mytable (`user_name`, `last_login`)';
     }
 
     public function getGenerateUniqueIndexSql(): string
     {
-        return 'CREATE UNIQUE INDEX index_name ON test (test, test2)';
+        return 'CREATE UNIQUE INDEX `index_name` ON test (`test`, `test2`)';
     }
 
     protected function getGenerateForeignKeySql(): string
     {
-        return 'ALTER TABLE test ADD FOREIGN KEY (fk_name_id) REFERENCES other_table (id)';
+        return 'ALTER TABLE test ADD FOREIGN KEY (`fk_name_id`) REFERENCES `other_table` (`id`)';
     }
 
     public function testUniquePrimaryKey(): void
@@ -153,8 +153,8 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         $sql = $this->platform->getAlterTableSQL($diff);
 
         self::assertEquals([
-            'ALTER TABLE foo ADD PRIMARY KEY (bar)',
-            'CREATE UNIQUE INDEX UNIQ_8C73652178240498 ON foo (baz)',
+            'ALTER TABLE `foo` ADD PRIMARY KEY (bar)',
+            'CREATE UNIQUE INDEX `UNIQ_8C73652178240498` ON `foo` (`baz`)',
         ], $sql);
     }
 
@@ -190,7 +190,7 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
     {
         return [
             'CREATE TABLE `quoted` (`create` VARCHAR(255) NOT NULL, '
-                . 'INDEX IDX_22660D028FD6E0FB (`create`))',
+                . 'INDEX `IDX_22660D028FD6E0FB` (`create`))',
         ];
     }
 
@@ -198,8 +198,8 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
     protected function getQuotedNameInIndexSQL(): array
     {
         return [
-            'CREATE TABLE test (column1 VARCHAR(255) NOT NULL, '
-                . 'INDEX `key` (column1))',
+            'CREATE TABLE `test` (`column1` VARCHAR(255) NOT NULL, '
+                . 'INDEX `key` (`column1`))',
         ];
     }
 
@@ -207,14 +207,14 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
     protected function getQuotedColumnInForeignKeySQL(): array
     {
         return [
-            'CREATE TABLE `quoted` (`create` VARCHAR(255) NOT NULL, foo VARCHAR(255) NOT NULL, '
-                . '`bar` VARCHAR(255) NOT NULL, INDEX IDX_22660D028FD6E0FB8C736521D79164E3 (`create`, foo, `bar`))',
-            'ALTER TABLE `quoted` ADD CONSTRAINT FK_WITH_RESERVED_KEYWORD FOREIGN KEY (`create`, foo, `bar`)'
-                . ' REFERENCES `foreign` (`create`, bar, `foo-bar`)',
-            'ALTER TABLE `quoted` ADD CONSTRAINT FK_WITH_NON_RESERVED_KEYWORD FOREIGN KEY (`create`, foo, `bar`)'
-                . ' REFERENCES foo (`create`, bar, `foo-bar`)',
-            'ALTER TABLE `quoted` ADD CONSTRAINT FK_WITH_INTENDED_QUOTATION FOREIGN KEY (`create`, foo, `bar`)'
-                . ' REFERENCES `foo-bar` (`create`, bar, `foo-bar`)',
+            'CREATE TABLE `quoted` (`create` VARCHAR(255) NOT NULL, `foo` VARCHAR(255) NOT NULL, '
+                . '`bar` VARCHAR(255) NOT NULL, INDEX `IDX_22660D028FD6E0FB8C736521D79164E3` (`create`, `foo`, `bar`))',
+            'ALTER TABLE `quoted` ADD CONSTRAINT `FK_WITH_RESERVED_KEYWORD` FOREIGN KEY (`create`, `foo`, `bar`)'
+                . ' REFERENCES `foreign` (`create`, `bar`, `foo-bar`)',
+            'ALTER TABLE `quoted` ADD CONSTRAINT `FK_WITH_NON_RESERVED_KEYWORD` FOREIGN KEY (`create`, `foo`, `bar`)'
+                . ' REFERENCES `foo` (`create`, `bar`, `foo-bar`)',
+            'ALTER TABLE `quoted` ADD CONSTRAINT `FK_WITH_INTENDED_QUOTATION` FOREIGN KEY (`create`, `foo`, `bar`)'
+                . ' REFERENCES `foo-bar` (`create`, `bar`, `foo-bar`)',
         ];
     }
 
@@ -231,8 +231,8 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         $sql = $this->platform->getCreateTableSQL($table);
         self::assertEquals(
             [
-                'CREATE TABLE fulltext_table (text LONGTEXT NOT NULL, '
-                . 'FULLTEXT INDEX fulltext_text (text)) '
+                'CREATE TABLE `fulltext_table` (`text` LONGTEXT NOT NULL, '
+                . 'FULLTEXT INDEX `fulltext_text` (`text`)) '
                 . 'ENGINE = MyISAM',
             ],
             $sql,
@@ -252,7 +252,7 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         $sql = $this->platform->getCreateTableSQL($table);
         self::assertEquals(
             [
-                'CREATE TABLE spatial_table (point LONGTEXT NOT NULL, SPATIAL INDEX spatial_text (point)) '
+                'CREATE TABLE `spatial_table` (`point` LONGTEXT NOT NULL, SPATIAL INDEX `spatial_text` (`point`)) '
                 . 'ENGINE = MyISAM',
             ],
             $sql,
@@ -299,7 +299,7 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
             ->compareTables($table, $diffTable);
 
         self::assertEquals(
-            ['DROP INDEX idx_id ON alter_table_add_pk', 'ALTER TABLE alter_table_add_pk ADD PRIMARY KEY (id)'],
+            ['DROP INDEX `idx_id` ON `alter_table_add_pk`', 'ALTER TABLE `alter_table_add_pk` ADD PRIMARY KEY (id)'],
             $this->platform->getAlterTableSQL($diff),
         );
     }
@@ -321,9 +321,9 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         self::assertEquals(
             [
-                'ALTER TABLE alter_primary_key MODIFY id INT NOT NULL',
-                'DROP INDEX `primary` ON alter_primary_key',
-                'ALTER TABLE alter_primary_key ADD PRIMARY KEY (foo)',
+                'ALTER TABLE `alter_primary_key` MODIFY `id` INT NOT NULL',
+                'DROP INDEX `primary` ON `alter_primary_key`',
+                'ALTER TABLE `alter_primary_key` ADD PRIMARY KEY (`foo`)',
             ],
             $this->platform->getAlterTableSQL($diff),
         );
@@ -346,8 +346,8 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         self::assertEquals(
             [
-                'ALTER TABLE drop_primary_key MODIFY id INT NOT NULL',
-                'DROP INDEX `primary` ON drop_primary_key',
+                'ALTER TABLE `drop_primary_key` MODIFY `id` INT NOT NULL',
+                'DROP INDEX `primary` ON `drop_primary_key`',
             ],
             $this->platform->getAlterTableSQL($diff),
         );
@@ -371,9 +371,9 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         self::assertSame(
             [
-                'ALTER TABLE tbl MODIFY id INT NOT NULL',
-                'DROP INDEX `primary` ON tbl',
-                'ALTER TABLE tbl ADD PRIMARY KEY (id)',
+                'ALTER TABLE `tbl` MODIFY `id` INT NOT NULL',
+                'DROP INDEX `primary` ON `tbl`',
+                'ALTER TABLE `tbl` ADD PRIMARY KEY (`id`)',
             ],
             $this->platform->getAlterTableSQL($diff),
         );
@@ -397,9 +397,9 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         self::assertSame(
             [
-                'ALTER TABLE tbl MODIFY id INT NOT NULL',
-                'DROP INDEX `primary` ON tbl',
-                'ALTER TABLE tbl ADD PRIMARY KEY (id, foo)',
+                'ALTER TABLE `tbl` MODIFY `id` INT NOT NULL',
+                'DROP INDEX `primary` ON `tbl`',
+                'ALTER TABLE `tbl` ADD PRIMARY KEY (`id`, `foo`)',
             ],
             $this->platform->getAlterTableSQL($diff),
         );
@@ -420,7 +420,7 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         $sql = $this->platform->getAlterTableSQL($diff);
 
-        self::assertEquals(['ALTER TABLE foo ADD id INT AUTO_INCREMENT NOT NULL, ADD PRIMARY KEY (id)'], $sql);
+        self::assertEquals(['ALTER TABLE `foo` ADD `id` INT AUTO_INCREMENT NOT NULL, ADD PRIMARY KEY (id)'], $sql);
     }
 
     public function testAlterPrimaryKeyWithNewColumn(): void
@@ -441,9 +441,9 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         self::assertSame(
             [
-                'DROP INDEX `primary` ON yolo',
-                'ALTER TABLE yolo ADD pkc2 INT NOT NULL',
-                'ALTER TABLE yolo ADD PRIMARY KEY (pkc1, pkc2)',
+                'DROP INDEX `primary` ON `yolo`',
+                'ALTER TABLE `yolo` ADD `pkc2` INT NOT NULL',
+                'ALTER TABLE `yolo` ADD PRIMARY KEY (`pkc1`, `pkc2`)',
             ],
             $this->platform->getAlterTableSQL($diff),
         );
@@ -496,8 +496,8 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
     protected function getAlterTableRenameIndexInSchemaSQL(): array
     {
         return [
-            'DROP INDEX idx_foo ON myschema.mytable',
-            'CREATE INDEX idx_bar ON myschema.mytable (id)',
+            'DROP INDEX `idx_foo` ON `myschema`.`mytable`',
+            'CREATE INDEX idx_bar ON `myschema`.`mytable` (`id`)',
         ];
     }
 
@@ -512,6 +512,16 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         ];
     }
 
+    protected function getQuotedCommentOnColumnSQLWithoutQuoteCharacter(): string
+    {
+        return "COMMENT ON COLUMN `mytable`.`id` IS 'This is a comment'";
+    }
+
+    protected function getQuotedCommentOnColumnSQLWithQuoteCharacter(): string
+    {
+        return "COMMENT ON COLUMN `mytable`.`id` IS 'It''s a quote !'";
+    }
+
     public function testIgnoresDifferenceInDefaultValuesForUnsupportedColumnTypes(): void
     {
         $table = new Table('text_blob_default_value');
@@ -522,10 +532,10 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         self::assertSame(
             [
-                'CREATE TABLE text_blob_default_value (def_text LONGTEXT NOT NULL, '
-                    . 'def_text_null LONGTEXT DEFAULT NULL, '
-                    . 'def_blob LONGBLOB NOT NULL, '
-                    . 'def_blob_null LONGBLOB DEFAULT NULL'
+                'CREATE TABLE `text_blob_default_value` (`def_text` LONGTEXT NOT NULL, '
+                    . '`def_text_null` LONGTEXT DEFAULT NULL, '
+                    . '`def_blob` LONGBLOB NOT NULL, '
+                    . '`def_blob_null` LONGBLOB DEFAULT NULL'
                     . ')',
             ],
             $this->platform->getCreateTableSQL($table),
@@ -554,7 +564,7 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
     protected function getCommentOnColumnSQL(): array
     {
         return [
-            "COMMENT ON COLUMN foo.bar IS 'comment'",
+            "COMMENT ON COLUMN `foo`.`bar` IS 'comment'",
             "COMMENT ON COLUMN `Foo`.`BAR` IS 'comment'",
             "COMMENT ON COLUMN `select`.`from` IS 'comment'",
         ];
@@ -567,7 +577,7 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
     protected function getQuotesReservedKeywordInIndexDeclarationSQL(): string
     {
-        return 'INDEX `select` (foo)';
+        return 'INDEX `select` (`foo`)';
     }
 
     protected function getQuotesReservedKeywordInTruncateTableSQL(): string
@@ -580,7 +590,7 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
      */
     protected function getAlterStringToFixedStringSQL(): array
     {
-        return ['ALTER TABLE mytable CHANGE name name CHAR(2) NOT NULL'];
+        return ['ALTER TABLE `mytable` CHANGE `name` `name` CHAR(2) NOT NULL'];
     }
 
     /**
@@ -589,10 +599,10 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
     protected function getGeneratesAlterTableRenameIndexUsedByForeignKeySQL(): array
     {
         return [
-            'ALTER TABLE mytable DROP FOREIGN KEY fk_foo',
-            'DROP INDEX idx_foo ON mytable',
-            'CREATE INDEX idx_foo_renamed ON mytable (foo)',
-            'ALTER TABLE mytable ADD CONSTRAINT fk_foo FOREIGN KEY (foo) REFERENCES foreign_table (id)',
+            'ALTER TABLE `mytable` DROP FOREIGN KEY fk_foo',
+            'DROP INDEX `idx_foo` ON `mytable`',
+            'CREATE INDEX `idx_foo_renamed` ON mytable (foo)',
+            'ALTER TABLE `mytable` ADD CONSTRAINT `fk_foo` FOREIGN KEY (`foo`) REFERENCES foreign_table (id)',
         ];
     }
 
@@ -674,8 +684,8 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         self::assertSame(
             [
-                'CREATE TABLE foo (no_collation VARCHAR(255) NOT NULL, '
-                    . 'column_collation VARCHAR(255) NOT NULL COLLATE `ascii_general_ci`)',
+                'CREATE TABLE `foo` (`no_collation` VARCHAR(255) NOT NULL, '
+                    . '`column_collation` VARCHAR(255) NOT NULL COLLATE `ascii_general_ci`)',
             ],
             $this->platform->getCreateTableSQL($table),
         );

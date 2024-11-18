@@ -36,7 +36,8 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
 
     public function getGenerateTableSql(): string
     {
-        return 'CREATE TABLE test (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, test VARCHAR(255) DEFAULT NULL)';
+        return 'CREATE TABLE "test" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL'
+            . ', "test" VARCHAR(255) DEFAULT NULL)';
     }
 
     /**
@@ -45,8 +46,8 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
     public function getGenerateTableWithMultiColumnUniqueIndexSql(): array
     {
         return [
-            'CREATE TABLE test (foo VARCHAR(255) DEFAULT NULL, bar VARCHAR(255) DEFAULT NULL)',
-            'CREATE UNIQUE INDEX UNIQ_D87F7E0C8C73652176FF8CAA ON test (foo, bar)',
+            'CREATE TABLE "test" ("foo" VARCHAR(255) DEFAULT NULL, "bar" VARCHAR(255) DEFAULT NULL)',
+            'CREATE UNIQUE INDEX "UNIQ_D87F7E0C8C73652176FF8CAA" ON "test" ("foo", "bar")',
         ];
     }
 
@@ -173,12 +174,12 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
 
     public function getGenerateIndexSql(): string
     {
-        return 'CREATE INDEX my_idx ON mytable (user_name, last_login)';
+        return 'CREATE INDEX "my_idx" ON mytable ("user_name", "last_login")';
     }
 
     public function getGenerateUniqueIndexSql(): string
     {
-        return 'CREATE UNIQUE INDEX index_name ON test (test, test2)';
+        return 'CREATE UNIQUE INDEX "index_name" ON test ("test", "test2")';
     }
 
     public function testGeneratesIndexCreationSqlWithSchema(): void
@@ -186,7 +187,7 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
         $indexDef = new Index('i', ['a', 'b']);
 
         self::assertSame(
-            'CREATE INDEX main.i ON mytable (a, b)',
+            'CREATE INDEX main."i" ON mytable ("a", "b")',
             $this->platform->getCreateIndexSQL($indexDef, 'main.mytable'),
         );
     }
@@ -245,7 +246,7 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
 
         $createTableSQL = $this->platform->getCreateTableSQL($table);
         self::assertEquals(
-            'CREATE TABLE test ("like" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)',
+            'CREATE TABLE "test" ("like" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)',
             $createTableSQL[0],
         );
     }
@@ -263,8 +264,8 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
         ]);
 
         $expected = [
-            'ALTER TABLE user ADD COLUMN foo VARCHAR NOT NULL',
-            'ALTER TABLE user ADD COLUMN count INTEGER DEFAULT 1',
+            'ALTER TABLE "user" ADD COLUMN "foo" VARCHAR NOT NULL',
+            'ALTER TABLE "user" ADD COLUMN "count" INTEGER DEFAULT 1',
         ];
 
         self::assertEquals($expected, $this->platform->getAlterTableSQL($diff));
@@ -299,19 +300,19 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
         $table->addForeignKeyConstraint('user', ['parent'], ['id'], ['deferrable' => true, 'deferred' => true]);
 
         $sql = [
-            'CREATE TABLE user ('
-                . 'id INTEGER NOT NULL, article INTEGER NOT NULL, post INTEGER NOT NULL, parent INTEGER NOT NULL'
-                . ', PRIMARY KEY(id)'
-                . ', CONSTRAINT FK_8D93D64923A0E66 FOREIGN KEY (article)'
-                . ' REFERENCES article (id) DEFERRABLE INITIALLY IMMEDIATE'
-                . ', CONSTRAINT FK_8D93D6495A8A6C8D FOREIGN KEY (post)'
-                . ' REFERENCES post (id) NOT DEFERRABLE INITIALLY DEFERRED'
-                . ', CONSTRAINT FK_8D93D6493D8E604F FOREIGN KEY (parent)'
-                . ' REFERENCES user (id) DEFERRABLE INITIALLY DEFERRED'
+            'CREATE TABLE "user" ('
+                . '"id" INTEGER NOT NULL, "article" INTEGER NOT NULL, "post" INTEGER NOT NULL'
+                . ', "parent" INTEGER NOT NULL, PRIMARY KEY("id")'
+                . ', CONSTRAINT "FK_8D93D64923A0E66" FOREIGN KEY ("article")'
+                . ' REFERENCES "article" ("id") DEFERRABLE INITIALLY IMMEDIATE'
+                . ', CONSTRAINT "FK_8D93D6495A8A6C8D" FOREIGN KEY ("post")'
+                . ' REFERENCES "post" ("id") NOT DEFERRABLE INITIALLY DEFERRED'
+                . ', CONSTRAINT "FK_8D93D6493D8E604F" FOREIGN KEY ("parent")'
+                . ' REFERENCES "user" ("id") DEFERRABLE INITIALLY DEFERRED'
                 . ')',
-            'CREATE INDEX IDX_8D93D64923A0E66 ON user (article)',
-            'CREATE INDEX IDX_8D93D6495A8A6C8D ON user (post)',
-            'CREATE INDEX IDX_8D93D6493D8E604F ON user (parent)',
+            'CREATE INDEX "IDX_8D93D64923A0E66" ON "user" ("article")',
+            'CREATE INDEX "IDX_8D93D6495A8A6C8D" ON "user" ("post")',
+            'CREATE INDEX "IDX_8D93D6493D8E604F" ON "user" ("parent")',
         ];
 
         self::assertEquals($sql, $this->platform->getCreateTableSQL($table));
@@ -351,20 +352,20 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
         );
 
         $sql = [
-            'CREATE TEMPORARY TABLE __temp__user AS SELECT id, article, post FROM user',
-            'DROP TABLE user',
-            'CREATE TABLE user ('
-                . '"key" INTEGER NOT NULL, article INTEGER NOT NULL, comment INTEGER NOT NULL'
+            'CREATE TEMPORARY TABLE "__temp__user" AS SELECT "id", "article", "post" FROM "user"',
+            'DROP TABLE "user"',
+            'CREATE TABLE "user" ('
+                . '"key" INTEGER NOT NULL, "article" INTEGER NOT NULL, "comment" INTEGER NOT NULL'
                 . ', PRIMARY KEY("key")'
-                . ', CONSTRAINT FK_8D93D64923A0E66 FOREIGN KEY (article)'
-                . ' REFERENCES article (id) DEFERRABLE INITIALLY IMMEDIATE'
-                . ', CONSTRAINT FK_8D93D6495A8A6C8D FOREIGN KEY (comment)'
-                . ' REFERENCES post (id) NOT DEFERRABLE INITIALLY DEFERRED'
+                . ', CONSTRAINT "FK_8D93D64923A0E66" FOREIGN KEY ("article")'
+                . ' REFERENCES "article" ("id") DEFERRABLE INITIALLY IMMEDIATE'
+                . ', CONSTRAINT "FK_8D93D6495A8A6C8D" FOREIGN KEY ("comment")'
+                . ' REFERENCES "post" ("id") NOT DEFERRABLE INITIALLY DEFERRED'
                 . ')',
-            'INSERT INTO user ("key", article, comment) SELECT id, article, post FROM __temp__user',
-            'DROP TABLE __temp__user',
-            'CREATE INDEX IDX_8D93D64923A0E66 ON user (article)',
-            'CREATE INDEX IDX_8D93D6495A8A6C8D ON user (comment)',
+            'INSERT INTO "user" ("key", "article", "comment") SELECT "id", "article", "post" FROM "__temp__user"',
+            'DROP TABLE "__temp__user"',
+            'CREATE INDEX "IDX_8D93D64923A0E66" ON "user" ("article")',
+            'CREATE INDEX "IDX_8D93D6495A8A6C8D" ON "user" ("comment")',
         ];
 
         self::assertEquals($sql, $this->platform->getAlterTableSQL($diff));
@@ -385,7 +386,7 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
     {
         return [
             'CREATE TABLE "quoted" ("create" VARCHAR(255) NOT NULL)',
-            'CREATE INDEX IDX_22660D028FD6E0FB ON "quoted" ("create")',
+            'CREATE INDEX "IDX_22660D028FD6E0FB" ON "quoted" ("create")',
         ];
     }
 
@@ -395,8 +396,8 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
     protected function getQuotedNameInIndexSQL(): array
     {
         return [
-            'CREATE TABLE test (column1 VARCHAR(255) NOT NULL)',
-            'CREATE INDEX "key" ON test (column1)',
+            'CREATE TABLE "test" ("column1" VARCHAR(255) NOT NULL)',
+            'CREATE INDEX "key" ON "test" ("column1")',
         ];
     }
 
@@ -407,14 +408,14 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
     {
         return [
             'CREATE TABLE "quoted" (' .
-            '"create" VARCHAR(255) NOT NULL, foo VARCHAR(255) NOT NULL, "bar" VARCHAR(255) NOT NULL, ' .
-            'CONSTRAINT FK_WITH_RESERVED_KEYWORD FOREIGN KEY ("create", foo, "bar") ' .
-            'REFERENCES "foreign" ("create", bar, "foo-bar") NOT DEFERRABLE INITIALLY IMMEDIATE, ' .
-            'CONSTRAINT FK_WITH_NON_RESERVED_KEYWORD FOREIGN KEY ("create", foo, "bar") ' .
-            'REFERENCES foo ("create", bar, "foo-bar") NOT DEFERRABLE INITIALLY IMMEDIATE, ' .
-            'CONSTRAINT FK_WITH_INTENDED_QUOTATION FOREIGN KEY ("create", foo, "bar") ' .
-            'REFERENCES "foo-bar" ("create", bar, "foo-bar") NOT DEFERRABLE INITIALLY IMMEDIATE)',
-            'CREATE INDEX IDX_22660D028FD6E0FB8C736521D79164E3 ON "quoted" ("create", foo, "bar")',
+            '"create" VARCHAR(255) NOT NULL, "foo" VARCHAR(255) NOT NULL, "bar" VARCHAR(255) NOT NULL, ' .
+            'CONSTRAINT "FK_WITH_RESERVED_KEYWORD" FOREIGN KEY ("create", "foo", "bar") ' .
+            'REFERENCES "foreign" ("create", "bar", "foo-bar") NOT DEFERRABLE INITIALLY IMMEDIATE, ' .
+            'CONSTRAINT "FK_WITH_NON_RESERVED_KEYWORD" FOREIGN KEY ("create", "foo", "bar") ' .
+            'REFERENCES "foo" ("create", "bar", "foo-bar") NOT DEFERRABLE INITIALLY IMMEDIATE, ' .
+            'CONSTRAINT "FK_WITH_INTENDED_QUOTATION" FOREIGN KEY ("create", "foo", "bar") ' .
+            'REFERENCES "foo-bar" ("create", "bar", "foo-bar") NOT DEFERRABLE INITIALLY IMMEDIATE)',
+            'CREATE INDEX "IDX_22660D028FD6E0FB8C736521D79164E3" ON "quoted" ("create", "foo", "bar")',
         ];
     }
 
@@ -444,12 +445,12 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
     protected function getAlterTableRenameIndexSQL(): array
     {
         return [
-            'CREATE TEMPORARY TABLE __temp__mytable AS SELECT id FROM mytable',
-            'DROP TABLE mytable',
-            'CREATE TABLE mytable (id INTEGER NOT NULL, PRIMARY KEY(id))',
-            'INSERT INTO mytable (id) SELECT id FROM __temp__mytable',
-            'DROP TABLE __temp__mytable',
-            'CREATE INDEX idx_bar ON mytable (id)',
+            'CREATE TEMPORARY TABLE "__temp__mytable" AS SELECT "id" FROM "mytable"',
+            'DROP TABLE "mytable"',
+            'CREATE TABLE "mytable" ("id" INTEGER NOT NULL, PRIMARY KEY("id"))',
+            'INSERT INTO "mytable" ("id") SELECT "id" FROM "__temp__mytable"',
+            'DROP TABLE "__temp__mytable"',
+            'CREATE INDEX "idx_bar" ON "mytable" ("id")',
         ];
     }
 
@@ -459,14 +460,24 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
     protected function getQuotedAlterTableRenameIndexSQL(): array
     {
         return [
-            'CREATE TEMPORARY TABLE __temp__table AS SELECT id FROM "table"',
+            'CREATE TEMPORARY TABLE "__temp__table" AS SELECT "id" FROM "table"',
             'DROP TABLE "table"',
-            'CREATE TABLE "table" (id INTEGER NOT NULL, PRIMARY KEY(id))',
-            'INSERT INTO "table" (id) SELECT id FROM __temp__table',
-            'DROP TABLE __temp__table',
-            'CREATE INDEX "select" ON "table" (id)',
-            'CREATE INDEX "bar" ON "table" (id)',
+            'CREATE TABLE "table" ("id" INTEGER NOT NULL, PRIMARY KEY("id"))',
+            'INSERT INTO "table" ("id") SELECT "id" FROM "__temp__table"',
+            'DROP TABLE "__temp__table"',
+            'CREATE INDEX "select" ON "table" ("id")',
+            'CREATE INDEX "bar" ON "table" ("id")',
         ];
+    }
+
+    protected function getQuotedCommentOnColumnSQLWithoutQuoteCharacter(): string
+    {
+        return "COMMENT ON COLUMN \"mytable\".\"id\" IS 'This is a comment'";
+    }
+
+    protected function getQuotedCommentOnColumnSQLWithQuoteCharacter(): string
+    {
+        return "COMMENT ON COLUMN \"mytable\".\"id\" IS 'It''s a quote !'";
     }
 
     public function testAlterTableRenameIndexInSchema(): void
@@ -503,11 +514,11 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
         ]);
 
         self::assertSame([
-            'CREATE TEMPORARY TABLE __temp__t AS SELECT a FROM main.t',
-            'DROP TABLE main.t',
-            'CREATE TABLE main.t (b INTEGER NOT NULL)',
-            'INSERT INTO main.t (b) SELECT a FROM __temp__t',
-            'DROP TABLE __temp__t',
+            'CREATE TEMPORARY TABLE "__temp__t" AS SELECT "a" FROM "main"."t"',
+            'DROP TABLE "main"."t"',
+            'CREATE TABLE "main"."t" ("b" INTEGER NOT NULL)',
+            'INSERT INTO "main"."t" ("b") SELECT "a" FROM "__temp__t"',
+            'DROP TABLE "__temp__t"',
         ], $this->platform->getAlterTableSQL($tableDiff));
     }
 
@@ -517,7 +528,7 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
     protected function getCommentOnColumnSQL(): array
     {
         return [
-            'COMMENT ON COLUMN foo.bar IS \'comment\'',
+            'COMMENT ON COLUMN "foo"."bar" IS \'comment\'',
             'COMMENT ON COLUMN "Foo"."BAR" IS \'comment\'',
             'COMMENT ON COLUMN "select"."from" IS \'comment\'',
         ];
@@ -550,7 +561,7 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
 
     protected function getQuotesReservedKeywordInIndexDeclarationSQL(): string
     {
-        return 'INDEX "select" (foo)';
+        return 'INDEX "select" ("foo")';
     }
 
     protected function getQuotesReservedKeywordInTruncateTableSQL(): string
@@ -564,11 +575,11 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
     protected function getAlterStringToFixedStringSQL(): array
     {
         return [
-            'CREATE TEMPORARY TABLE __temp__mytable AS SELECT name FROM mytable',
-            'DROP TABLE mytable',
-            'CREATE TABLE mytable (name CHAR(2) NOT NULL)',
-            'INSERT INTO mytable (name) SELECT name FROM __temp__mytable',
-            'DROP TABLE __temp__mytable',
+            'CREATE TEMPORARY TABLE "__temp__mytable" AS SELECT "name" FROM "mytable"',
+            'DROP TABLE "mytable"',
+            'CREATE TABLE "mytable" ("name" CHAR(2) NOT NULL)',
+            'INSERT INTO "mytable" ("name") SELECT "name" FROM "__temp__mytable"',
+            'DROP TABLE "__temp__mytable"',
         ];
     }
 
@@ -578,17 +589,17 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
     protected function getGeneratesAlterTableRenameIndexUsedByForeignKeySQL(): array
     {
         return [
-            'CREATE TEMPORARY TABLE __temp__mytable AS SELECT foo, bar, baz FROM mytable',
-            'DROP TABLE mytable',
-            'CREATE TABLE mytable (foo INTEGER NOT NULL, bar INTEGER NOT NULL, baz INTEGER NOT NULL, '
-                . 'CONSTRAINT fk_foo FOREIGN KEY (foo) REFERENCES foreign_table (id)'
+            'CREATE TEMPORARY TABLE "__temp__mytable" AS SELECT "foo", "bar", "baz" FROM "mytable"',
+            'DROP TABLE "mytable"',
+            'CREATE TABLE "mytable" ("foo" INTEGER NOT NULL, "bar" INTEGER NOT NULL, "baz" INTEGER NOT NULL, '
+                . 'CONSTRAINT "fk_foo" FOREIGN KEY ("foo") REFERENCES "foreign_table" ("id")'
                 . ' NOT DEFERRABLE INITIALLY IMMEDIATE, '
-                . 'CONSTRAINT fk_bar FOREIGN KEY (bar) REFERENCES foreign_table (id)'
+                . 'CONSTRAINT "fk_bar" FOREIGN KEY ("bar") REFERENCES "foreign_table" ("id")'
                 . ' NOT DEFERRABLE INITIALLY IMMEDIATE)',
-            'INSERT INTO mytable (foo, bar, baz) SELECT foo, bar, baz FROM __temp__mytable',
-            'DROP TABLE __temp__mytable',
-            'CREATE INDEX idx_bar ON mytable (bar)',
-            'CREATE INDEX idx_foo_renamed ON mytable (foo)',
+            'INSERT INTO "mytable" ("foo", "bar", "baz") SELECT "foo", "bar", "baz" FROM "__temp__mytable"',
+            'DROP TABLE "__temp__mytable"',
+            'CREATE INDEX "idx_bar" ON "mytable" ("bar")',
+            'CREATE INDEX "idx_foo_renamed" ON "mytable" ("foo")',
         ];
     }
 
@@ -630,8 +641,8 @@ class SQLitePlatformTest extends AbstractPlatformTestCase
 
         self::assertSame(
             [
-                'CREATE TABLE foo (no_collation VARCHAR(255) NOT NULL, '
-                    . 'column_collation VARCHAR(255) NOT NULL COLLATE "NOCASE")',
+                'CREATE TABLE "foo" ("no_collation" VARCHAR(255) NOT NULL, '
+                    . '"column_collation" VARCHAR(255) NOT NULL COLLATE "NOCASE")',
             ],
             $this->platform->getCreateTableSQL($table),
         );

@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Doctrine\DBAL\Platforms;
 
-use Doctrine\DBAL\Platforms\Keywords\KeywordList;
-use Doctrine\DBAL\Platforms\Keywords\MariaDBKeywords;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\SQL\Builder\DefaultSelectSQLBuilder;
 use Doctrine\DBAL\SQL\Builder\SelectSQLBuilder;
 use Doctrine\DBAL\Types\JsonType;
-use Doctrine\Deprecations\Deprecation;
 
 /**
  * Provides the behavior, features and SQL dialect of the MariaDB database platform of the oldest supported version.
@@ -76,18 +73,5 @@ class MariaDBPlatform extends AbstractMySQLPlatform
     public function createSelectSQLBuilder(): SelectSQLBuilder
     {
         return new DefaultSelectSQLBuilder($this, 'FOR UPDATE', null);
-    }
-
-    /** @deprecated */
-    protected function createReservedKeywordsList(): KeywordList
-    {
-        Deprecation::triggerIfCalledFromOutside(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/6607',
-            '%s is deprecated.',
-            __METHOD__,
-        );
-
-        return new MariaDBKeywords();
     }
 }

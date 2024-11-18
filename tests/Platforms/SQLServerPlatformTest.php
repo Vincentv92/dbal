@@ -38,7 +38,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
 
     public function getGenerateTableSql(): string
     {
-        return 'CREATE TABLE test (id INT IDENTITY NOT NULL, test NVARCHAR(255), PRIMARY KEY (id))';
+        return 'CREATE TABLE [test] ([id] INT IDENTITY NOT NULL, [test] NVARCHAR(255), PRIMARY KEY ([id]))';
     }
 
     /**
@@ -47,9 +47,9 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
     public function getGenerateTableWithMultiColumnUniqueIndexSql(): array
     {
         return [
-            'CREATE TABLE test (foo NVARCHAR(255), bar NVARCHAR(255))',
-            'CREATE UNIQUE INDEX UNIQ_D87F7E0C8C73652176FF8CAA ON test (foo, bar)'
-                . ' WHERE foo IS NOT NULL AND bar IS NOT NULL',
+            'CREATE TABLE [test] ([foo] NVARCHAR(255), [bar] NVARCHAR(255))',
+            'CREATE UNIQUE INDEX [UNIQ_D87F7E0C8C73652176FF8CAA] ON [test] ([foo], [bar])'
+                . ' WHERE [foo] IS NOT NULL AND [bar] IS NOT NULL',
         ];
     }
 
@@ -165,17 +165,18 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
 
     public function getGenerateIndexSql(): string
     {
-        return 'CREATE INDEX my_idx ON mytable (user_name, last_login)';
+        return 'CREATE INDEX [my_idx] ON mytable ([user_name], [last_login])';
     }
 
     public function getGenerateUniqueIndexSql(): string
     {
-        return 'CREATE UNIQUE INDEX index_name ON test (test, test2) WHERE test IS NOT NULL AND test2 IS NOT NULL';
+        return 'CREATE UNIQUE INDEX [index_name] ON test ([test], [test2]) WHERE [test] IS NOT NULL'
+            . ' AND [test2] IS NOT NULL';
     }
 
     protected function getGenerateForeignKeySql(): string
     {
-        return 'ALTER TABLE test ADD FOREIGN KEY (fk_name_id) REFERENCES other_table (id)';
+        return 'ALTER TABLE test ADD FOREIGN KEY ([fk_name_id]) REFERENCES [other_table] ([id])';
     }
 
     public function testModifyLimitQuery(): void
@@ -557,7 +558,10 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
     {
         $idx = new Index('idx', ['id']);
         $idx->addFlag('clustered');
-        self::assertEquals('CREATE CLUSTERED INDEX idx ON tbl (id)', $this->platform->getCreateIndexSQL($idx, 'tbl'));
+        self::assertEquals(
+            'CREATE CLUSTERED INDEX [idx] ON tbl ([id])',
+            $this->platform->getCreateIndexSQL($idx, 'tbl'),
+        );
     }
 
     public function testCreateNonClusteredPrimaryKeyInTable(): void
@@ -568,7 +572,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
         $table->getIndex('primary')->addFlag('nonclustered');
 
         self::assertEquals(
-            ['CREATE TABLE tbl (id INT NOT NULL, PRIMARY KEY NONCLUSTERED (id))'],
+            ['CREATE TABLE [tbl] ([id] INT NOT NULL, PRIMARY KEY NONCLUSTERED ([id]))'],
             $this->platform->getCreateTableSQL($table),
         );
     }
@@ -578,7 +582,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
         $idx = new Index('idx', ['id'], false, true);
         $idx->addFlag('nonclustered');
         self::assertEquals(
-            'ALTER TABLE tbl ADD PRIMARY KEY NONCLUSTERED (id)',
+            'ALTER TABLE tbl ADD PRIMARY KEY NONCLUSTERED ([id])',
             $this->platform->getCreatePrimaryKeySQL($idx, 'tbl'),
         );
     }
@@ -586,7 +590,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
     public function testAlterAddPrimaryKey(): void
     {
         $idx = new Index('idx', ['id'], false, true);
-        self::assertEquals('ALTER TABLE tbl ADD PRIMARY KEY (id)', $this->platform->getCreateIndexSQL($idx, 'tbl'));
+        self::assertEquals('ALTER TABLE tbl ADD PRIMARY KEY ([id])', $this->platform->getCreateIndexSQL($idx, 'tbl'));
     }
 
     /**
@@ -604,7 +608,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
     {
         return [
             'CREATE TABLE [quoted] ([create] NVARCHAR(255) NOT NULL)',
-            'CREATE INDEX IDX_22660D028FD6E0FB ON [quoted] ([create])',
+            'CREATE INDEX [IDX_22660D028FD6E0FB] ON [quoted] ([create])',
         ];
     }
 
@@ -614,8 +618,8 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
     protected function getQuotedNameInIndexSQL(): array
     {
         return [
-            'CREATE TABLE test (column1 NVARCHAR(255) NOT NULL)',
-            'CREATE INDEX [key] ON test (column1)',
+            'CREATE TABLE [test] ([column1] NVARCHAR(255) NOT NULL)',
+            'CREATE INDEX [key] ON [test] ([column1])',
         ];
     }
 
@@ -626,14 +630,14 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
     {
         return [
             'CREATE TABLE [quoted] ([create] NVARCHAR(255) NOT NULL, '
-                . 'foo NVARCHAR(255) NOT NULL, [bar] NVARCHAR(255) NOT NULL)',
-            'CREATE INDEX IDX_22660D028FD6E0FB8C736521D79164E3 ON [quoted] ([create], foo, [bar])',
-            'ALTER TABLE [quoted] ADD CONSTRAINT FK_WITH_RESERVED_KEYWORD'
-                . ' FOREIGN KEY ([create], foo, [bar]) REFERENCES [foreign] ([create], bar, [foo-bar])',
-            'ALTER TABLE [quoted] ADD CONSTRAINT FK_WITH_NON_RESERVED_KEYWORD'
-                . ' FOREIGN KEY ([create], foo, [bar]) REFERENCES foo ([create], bar, [foo-bar])',
-            'ALTER TABLE [quoted] ADD CONSTRAINT FK_WITH_INTENDED_QUOTATION'
-                . ' FOREIGN KEY ([create], foo, [bar]) REFERENCES [foo-bar] ([create], bar, [foo-bar])',
+                . '[foo] NVARCHAR(255) NOT NULL, [bar] NVARCHAR(255) NOT NULL)',
+            'CREATE INDEX [IDX_22660D028FD6E0FB8C736521D79164E3] ON [quoted] ([create], [foo], [bar])',
+            'ALTER TABLE [quoted] ADD CONSTRAINT [FK_WITH_RESERVED_KEYWORD]'
+                . ' FOREIGN KEY ([create], [foo], [bar]) REFERENCES [foreign] ([create], [bar], [foo-bar])',
+            'ALTER TABLE [quoted] ADD CONSTRAINT [FK_WITH_NON_RESERVED_KEYWORD]'
+                . ' FOREIGN KEY ([create], [foo], [bar]) REFERENCES [foo] ([create], [bar], [foo-bar])',
+            'ALTER TABLE [quoted] ADD CONSTRAINT [FK_WITH_INTENDED_QUOTATION]'
+                . ' FOREIGN KEY ([create], [foo], [bar]) REFERENCES [foo-bar] ([create], [bar], [foo-bar])',
         ];
     }
 
@@ -651,7 +655,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
         $table->setPrimaryKey(['id']);
 
         $expectedSql = [
-            'CREATE TABLE testschema.test (id INT NOT NULL, PRIMARY KEY (id))',
+            'CREATE TABLE [testschema].[test] ([id] INT NOT NULL, PRIMARY KEY ([id]))',
             "EXEC sp_addextendedproperty N'MS_Description', N'This is a comment', "
                 . "N'SCHEMA', 'testschema', N'TABLE', 'test', N'COLUMN', 'id'",
         ];
@@ -672,7 +676,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
         ]);
 
         $expectedSql = [
-            'ALTER TABLE testschema.mytable ADD quota INT NOT NULL',
+            'ALTER TABLE [testschema].[mytable] ADD [quota] INT NOT NULL',
             "EXEC sp_addextendedproperty N'MS_Description', N'A comment', "
                 . "N'SCHEMA', 'testschema', N'TABLE', 'mytable', N'COLUMN', 'quota'",
         ];
@@ -835,7 +839,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
      */
     protected function getAlterTableRenameIndexSQL(): array
     {
-        return ["EXEC sp_rename N'mytable.idx_foo', N'idx_bar', N'INDEX'"];
+        return ["EXEC sp_rename N'[mytable].[idx_foo]', N'idx_bar', N'INDEX'"];
     }
 
     /**
@@ -849,12 +853,22 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
         ];
     }
 
+    protected function getQuotedCommentOnColumnSQLWithoutQuoteCharacter(): string
+    {
+        return "COMMENT ON COLUMN [mytable].[id] IS 'This is a comment'";
+    }
+
+    protected function getQuotedCommentOnColumnSQLWithQuoteCharacter(): string
+    {
+        return "COMMENT ON COLUMN [mytable].[id] IS 'It''s a quote !'";
+    }
+
     /**
      * {@inheritDoc}
      */
     protected function getAlterTableRenameIndexInSchemaSQL(): array
     {
-        return ["EXEC sp_rename N'myschema.mytable.idx_foo', N'idx_bar', N'INDEX'"];
+        return ["EXEC sp_rename N'[myschema].[mytable].[idx_foo]', N'idx_bar', N'INDEX'"];
     }
 
     /**
@@ -879,7 +893,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
     protected function getCommentOnColumnSQL(): array
     {
         return [
-            "COMMENT ON COLUMN foo.bar IS 'comment'",
+            "COMMENT ON COLUMN [foo].[bar] IS 'comment'",
             "COMMENT ON COLUMN [Foo].[BAR] IS 'comment'",
             "COMMENT ON COLUMN [select].[from] IS 'comment'",
         ];
@@ -907,7 +921,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
 
     protected function getQuotesReservedKeywordInIndexDeclarationSQL(): string
     {
-        return 'INDEX [select] (foo)';
+        return 'INDEX [select] ([foo])';
     }
 
     protected function getQuotesReservedKeywordInTruncateTableSQL(): string
@@ -920,7 +934,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
      */
     protected function getAlterStringToFixedStringSQL(): array
     {
-        return ['ALTER TABLE mytable ALTER COLUMN name NCHAR(2) NOT NULL'];
+        return ['ALTER TABLE [mytable] ALTER COLUMN [name] NCHAR(2) NOT NULL'];
     }
 
     /**
@@ -928,7 +942,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
      */
     protected function getGeneratesAlterTableRenameIndexUsedByForeignKeySQL(): array
     {
-        return ["EXEC sp_rename N'mytable.idx_foo', N'idx_foo_renamed', N'INDEX'"];
+        return ["EXEC sp_rename N'[mytable].[idx_foo]', N'idx_foo_renamed', N'INDEX'"];
     }
 
     protected function getLimitOffsetCastToIntExpectedQuery(): string
@@ -1047,8 +1061,8 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
             ->setPlatformOption('collation', 'Latin1_General_CS_AS_KS_WS');
 
         self::assertSame(
-            ['CREATE TABLE foo (no_collation NVARCHAR(255) NOT NULL, '
-                    . 'column_collation NVARCHAR(255) COLLATE Latin1_General_CS_AS_KS_WS NOT NULL)',
+            ['CREATE TABLE [foo] ([no_collation] NVARCHAR(255) NOT NULL, '
+                    . '[column_collation] NVARCHAR(255) COLLATE Latin1_General_CS_AS_KS_WS NOT NULL)',
             ],
             $this->platform->getCreateTableSQL($table),
         );
@@ -1063,16 +1077,16 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
     {
         $sequence = new Sequence('myseq', 20, 1);
         self::assertEquals(
-            'CREATE SEQUENCE myseq START WITH 1 INCREMENT BY 20 MINVALUE 1',
+            'CREATE SEQUENCE [myseq] START WITH 1 INCREMENT BY 20 MINVALUE 1',
             $this->platform->getCreateSequenceSQL($sequence),
         );
         self::assertEquals(
-            'ALTER SEQUENCE myseq INCREMENT BY 20',
+            'ALTER SEQUENCE [myseq] INCREMENT BY 20',
             $this->platform->getAlterSequenceSQL($sequence),
         );
         self::assertEquals(
-            'DROP SEQUENCE myseq',
-            $this->platform->getDropSequenceSQL('myseq'),
+            'DROP SEQUENCE [myseq]',
+            $this->platform->getDropSequenceSQL($sequence->getQuotedName($this->platform)),
         );
         self::assertEquals(
             'SELECT NEXT VALUE FOR myseq',
@@ -1091,7 +1105,7 @@ class SQLServerPlatformTest extends AbstractPlatformTestCase
             ),
         ]);
 
-        $expectedSql = ['ALTER TABLE testschema.mytable ALTER COLUMN quota INT NOT NULL'];
+        $expectedSql = ['ALTER TABLE [testschema].[mytable] ALTER COLUMN [quota] INT NOT NULL'];
 
         self::assertEquals($expectedSql, $this->platform->getAlterTableSQL($tableDiff));
     }

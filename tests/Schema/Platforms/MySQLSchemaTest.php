@@ -38,8 +38,8 @@ class MySQLSchemaTest extends TestCase
 
         self::assertEquals(
             [
-                'ALTER TABLE test ADD CONSTRAINT FK_D87F7E0C8E48560F FOREIGN KEY (foo_id)'
-                    . ' REFERENCES test_foreign (foo_id)',
+                'ALTER TABLE `test` ADD CONSTRAINT `FK_D87F7E0C8E48560F` FOREIGN KEY (`foo_id`)'
+                    . ' REFERENCES `test_foreign` (`foo_id`)',
             ],
             $sqls,
         );
@@ -60,7 +60,7 @@ class MySQLSchemaTest extends TestCase
         $sql = $this->platform->getAlterTableSQL($diff);
 
         self::assertEquals(
-            ['ALTER TABLE test ADD PRIMARY KEY (id)'],
+            ['ALTER TABLE `test` ADD PRIMARY KEY (id)'],
             $sql,
         );
     }

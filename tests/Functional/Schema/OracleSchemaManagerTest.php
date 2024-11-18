@@ -124,61 +124,30 @@ class OracleSchemaManagerTest extends SchemaManagerFunctionalTestCase
         self::assertSame(['"Id"'], $onlinePrimaryTablePrimaryKey->getQuotedColumns($platform));
 
         self::assertTrue($onlinePrimaryTable->hasColumn('select'));
-        self::assertSame('"select"', $onlinePrimaryTable->getColumn('select')->getQuotedName($platform));
-
         self::assertTrue($onlinePrimaryTable->hasColumn('foo'));
-        self::assertSame('FOO', $onlinePrimaryTable->getColumn('foo')->getQuotedName($platform));
-
         self::assertTrue($onlinePrimaryTable->hasColumn('BAR'));
-        self::assertSame('BAR', $onlinePrimaryTable->getColumn('BAR')->getQuotedName($platform));
-
         self::assertTrue($onlinePrimaryTable->hasColumn('"BAZ"'));
-        self::assertSame('BAZ', $onlinePrimaryTable->getColumn('"BAZ"')->getQuotedName($platform));
-
         self::assertTrue($onlinePrimaryTable->hasIndex('from'));
         self::assertTrue($onlinePrimaryTable->getIndex('from')->hasColumnAtPosition('"select"'));
-        self::assertSame(['"select"'], $onlinePrimaryTable->getIndex('from')->getQuotedColumns($platform));
 
         self::assertTrue($onlinePrimaryTable->hasIndex('foo_index'));
         self::assertTrue($onlinePrimaryTable->getIndex('foo_index')->hasColumnAtPosition('foo'));
-        self::assertSame(['FOO'], $onlinePrimaryTable->getIndex('foo_index')->getQuotedColumns($platform));
-
         self::assertTrue($onlinePrimaryTable->hasIndex('BAR_INDEX'));
         self::assertTrue($onlinePrimaryTable->getIndex('BAR_INDEX')->hasColumnAtPosition('BAR'));
-        self::assertSame(['BAR'], $onlinePrimaryTable->getIndex('BAR_INDEX')->getQuotedColumns($platform));
-
         self::assertTrue($onlinePrimaryTable->hasIndex('BAZ_INDEX'));
         self::assertTrue($onlinePrimaryTable->getIndex('BAZ_INDEX')->hasColumnAtPosition('"BAZ"'));
-        self::assertSame(['BAZ'], $onlinePrimaryTable->getIndex('BAZ_INDEX')->getQuotedColumns($platform));
 
         // Foreign table assertions
         self::assertTrue($onlineForeignTable->hasColumn('id'));
-        self::assertSame('ID', $onlineForeignTable->getColumn('id')->getQuotedName($platform));
 
         $onlineForeignTablePrimaryKey = $onlineForeignTable->getPrimaryKey();
         self::assertNotNull($onlineForeignTablePrimaryKey);
-        self::assertSame(['ID'], $onlineForeignTablePrimaryKey->getQuotedColumns($platform));
 
         self::assertTrue($onlineForeignTable->hasColumn('"Fk"'));
-        self::assertSame('"Fk"', $onlineForeignTable->getColumn('"Fk"')->getQuotedName($platform));
-
         self::assertTrue($onlineForeignTable->hasIndex('"Fk_index"'));
         self::assertTrue($onlineForeignTable->getIndex('"Fk_index"')->hasColumnAtPosition('"Fk"'));
-        self::assertSame(['"Fk"'], $onlineForeignTable->getIndex('"Fk_index"')->getQuotedColumns($platform));
 
         self::assertTrue($onlineForeignTable->hasForeignKey('"Primary_Table_Fk"'));
-        self::assertSame(
-            $primaryTableName,
-            $onlineForeignTable->getForeignKey('"Primary_Table_Fk"')->getQuotedForeignTableName($platform),
-        );
-        self::assertSame(
-            ['"Fk"'],
-            $onlineForeignTable->getForeignKey('"Primary_Table_Fk"')->getQuotedLocalColumns($platform),
-        );
-        self::assertSame(
-            ['"Id"'],
-            $onlineForeignTable->getForeignKey('"Primary_Table_Fk"')->getQuotedForeignColumns($platform),
-        );
     }
 
     public function testListTableColumnsSameTableNamesInDifferentSchemas(): void
