@@ -8,9 +8,9 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\Exception\InvalidObjectName;
 use Doctrine\DBAL\Schema\Name\Parser;
 use Doctrine\DBAL\Schema\Name\Parser\Identifier;
-use Doctrine\Deprecations\Deprecation;
 
 use function array_map;
+use function assert;
 use function count;
 use function crc32;
 use function dechex;
@@ -41,56 +41,24 @@ abstract class AbstractAsset
     /** @var list<Identifier> */
     private array $identifiers = [];
 
-    public function __construct(?string $name = null)
+    public function __construct(string $name)
     {
-        if ($name === null) {
-            Deprecation::trigger(
-                'doctrine/dbal',
-                'https://github.com/doctrine/dbal/pull/6610',
-                'Not passing $name to %s is deprecated.',
-                __METHOD__,
-            );
-
+        if ($name === '') {
             return;
         }
 
-        $this->_setName($name);
-    }
+        $parser = new Parser();
 
-    /**
-     * Sets the name of this asset.
-     *
-     * @deprecated Use the constructor instead.
-     */
-    protected function _setName(string $name): void
-    {
-        Deprecation::triggerIfCalledFromOutside(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/6610',
-            '%s is deprecated. Use the constructor instead.',
-            __METHOD__,
-        );
-
-        if ($name !== '') {
-            $parser = new Parser();
-
-            try {
-                $identifiers = $parser->parse($name);
-            } catch (Parser\Exception $e) {
-                throw InvalidObjectName::fromParserException($name, $e);
-            }
-        } else {
-            $identifiers = [];
+        try {
+            $identifiers = $parser->parse($name);
+        } catch (Parser\Exception $e) {
+            throw InvalidObjectName::fromParserException($name, $e);
         }
 
-        switch (count($identifiers)) {
-            case 0:
-                $this->_name       = '';
-                $this->_quoted     = false;
-                $this->_namespace  = null;
-                $this->identifiers = [];
+        $count = count($identifiers);
+        assert($count > 0);
 
-                return;
+        switch ($count) {
             case 1:
                 $namespace = null;
                 $name      = $identifiers[0];
@@ -102,7 +70,7 @@ abstract class AbstractAsset
                 break;
 
             default:
-                throw InvalidObjectName::tooManyQualifiers($name, count($identifiers) - 1);
+                throw InvalidObjectName::tooManyQualifiers($name, $count - 1);
         }
 
         $this->_name       = $name->getValue();
