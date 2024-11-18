@@ -55,6 +55,11 @@ all drivers and middleware.
 
 # Upgrade to 4.3
 
+## Deprecated `AbstractAsset::_setName()`
+
+Setting object name via `AbstractAsset::_setName()` has been deprecated. Pass the name to the `AbstractAsset`
+constructor instead.
+
 ## Marked `Identifier` class as internal
 
 In order to build SQL identifiers, use `AbstractPlatform::quoteSingleIdentifier()`.

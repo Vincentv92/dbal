@@ -8,6 +8,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\Exception\InvalidObjectName;
 use Doctrine\DBAL\Schema\Name\Parser;
 use Doctrine\DBAL\Schema\Name\Parser\Identifier;
+use Doctrine\Deprecations\Deprecation;
 
 use function array_map;
 use function count;
@@ -40,11 +41,36 @@ abstract class AbstractAsset
     /** @var list<Identifier> */
     private array $identifiers = [];
 
+    public function __construct(?string $name = null)
+    {
+        if ($name === null) {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/pull/6610',
+                'Not passing $name to %s is deprecated.',
+                __METHOD__,
+            );
+
+            return;
+        }
+
+        $this->_setName($name);
+    }
+
     /**
      * Sets the name of this asset.
+     *
+     * @deprecated Use the constructor instead.
      */
     protected function _setName(string $name): void
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/6610',
+            '%s is deprecated. Use the constructor instead.',
+            __METHOD__,
+        );
+
         if ($name !== '') {
             $parser = new Parser();
 

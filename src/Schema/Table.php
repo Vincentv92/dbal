@@ -82,7 +82,7 @@ class Table extends AbstractAsset
             throw InvalidTableName::new($name);
         }
 
-        $this->_setName($name);
+        parent::__construct($name);
 
         foreach ($columns as $column) {
             $this->_addColumn($column);
@@ -298,10 +298,15 @@ class Table extends AbstractAsset
             ));
         }
 
-        $column = $this->getColumn($oldName);
-        $column->_setName($newName);
+        $oldColumn = $this->getColumn($oldName);
+        $options   = $oldColumn->toArray();
+
+        unset($options['name'], $options['type']);
+
+        $newColumn = new Column($newName, $oldColumn->getType(), $options);
+
         unset($this->_columns[$oldName]);
-        $this->_addColumn($column);
+        $this->_addColumn($newColumn);
 
         $this->renameColumnInIndexes($oldName, $newName);
         $this->renameColumnInForeignKeyConstraints($oldName, $newName);
@@ -318,7 +323,7 @@ class Table extends AbstractAsset
             $this->renamedColumns[$newName] = $oldName;
         }
 
-        return $column;
+        return $newColumn;
     }
 
     /** @param array<string, mixed> $options */
