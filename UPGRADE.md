@@ -8,6 +8,10 @@ awareness about deprecated code.
 
 # Upgrade to 5.0
 
+## BC BREAK: Removed `AbstractAsset::_setName()`
+
+The `AbstractAsset::_setName()` method has been removed.
+
 ## BC BREAK: Removed Reserved Keyword Lists
 
 The following components have been removed:
@@ -36,7 +40,7 @@ The `AbstractPlatform::quoteIdentifier()` and `Connection::quoteIdentifier()` me
 
 ## BC BREAK: Removed `Table::removeForeignKey()` and `::removeUniqueConstraint()`
 
-The `Table::removeForeignKey()` and `::removeUniqueConstraint()` have been removed.
+The `Table::removeForeignKey()` and `::removeUniqueConstraint()` methods have been removed.
 
 ## BC BREAK: Removed `AbstractPlatform` constants
 
