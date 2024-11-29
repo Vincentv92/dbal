@@ -83,7 +83,6 @@ class Schema extends AbstractAsset
         }
 
         foreach ($tables as $table) {
-            $table->setSchemaConfig($this->_schemaConfig);
             $this->_addTable($table);
         }
 

@@ -61,10 +61,7 @@ class Table extends AbstractAsset
         'create_options' => [],
     ];
 
-    /** @deprecated Pass a {@link TableConfiguration} instance to the constructor instead. */
-    protected ?SchemaConfig $_schemaConfig = null;
-
-    private int $maxIdentifierLength;
+    private readonly int $maxIdentifierLength;
 
     /**
      * @param array<Column>               $columns
@@ -111,21 +108,6 @@ class Table extends AbstractAsset
         $this->_options = array_merge($this->_options, $options);
     }
 
-    /** @deprecated Pass a {@link TableConfiguration} instance to the constructor instead. */
-    public function setSchemaConfig(SchemaConfig $schemaConfig): void
-    {
-        Deprecation::triggerIfCalledFromOutside(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/6635',
-            '%s is deprecated. Pass TableConfiguration to the constructor instead.',
-            __METHOD__,
-        );
-
-        $this->_schemaConfig = $schemaConfig;
-
-        $this->maxIdentifierLength = $schemaConfig->getMaxIdentifierLength();
-    }
-
     /**
      * Sets the Primary Key.
      *
@@ -161,7 +143,7 @@ class Table extends AbstractAsset
         $indexName ??= $this->_generateIdentifierName(
             array_merge([$this->getName()], $columnNames),
             'uniq',
-            $this->_getMaxIdentifierLength(),
+            $this->maxIdentifierLength,
         );
 
         return $this->_addUniqueConstraint($this->_createUniqueConstraint($columnNames, $indexName, $flags, $options));
@@ -181,7 +163,7 @@ class Table extends AbstractAsset
         $indexName ??= $this->_generateIdentifierName(
             array_merge([$this->getName()], $columnNames),
             'idx',
-            $this->_getMaxIdentifierLength(),
+            $this->maxIdentifierLength,
         );
 
         return $this->_addIndex($this->_createIndex($columnNames, $indexName, false, false, $flags, $options));
@@ -223,7 +205,7 @@ class Table extends AbstractAsset
         $indexName ??= $this->_generateIdentifierName(
             array_merge([$this->getName()], $columnNames),
             'uniq',
-            $this->_getMaxIdentifierLength(),
+            $this->maxIdentifierLength,
         );
 
         return $this->_addIndex($this->_createIndex($columnNames, $indexName, true, false, [], $options));
@@ -408,7 +390,7 @@ class Table extends AbstractAsset
         $name ??= $this->_generateIdentifierName(
             array_merge([$this->getName()], $localColumnNames),
             'fk',
-            $this->_getMaxIdentifierLength(),
+            $this->maxIdentifierLength,
         );
 
         foreach ($localColumnNames as $columnName) {
@@ -641,19 +623,6 @@ class Table extends AbstractAsset
         }
     }
 
-    /** @deprecated */
-    protected function _getMaxIdentifierLength(): int
-    {
-        Deprecation::triggerIfCalledFromOutside(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/6635',
-            '%s is deprecated.',
-            __METHOD__,
-        );
-
-        return $this->maxIdentifierLength;
-    }
-
     protected function _addColumn(Column $column): void
     {
         $columnName = $column->getName();
@@ -715,7 +684,7 @@ class Table extends AbstractAsset
             : $this->_generateIdentifierName(
                 array_merge((array) $this->getName(), $constraint->getColumns()),
                 'fk',
-                $this->_getMaxIdentifierLength(),
+                $this->maxIdentifierLength,
             );
 
         $name = $this->normalizeIdentifier($name);
@@ -728,7 +697,7 @@ class Table extends AbstractAsset
         $indexName = $this->_generateIdentifierName(
             array_merge([$this->getName()], $constraint->getColumns()),
             'idx',
-            $this->_getMaxIdentifierLength(),
+            $this->maxIdentifierLength,
         );
 
         $indexCandidate = $this->_createIndex($constraint->getColumns(), $indexName, true, false);
@@ -751,7 +720,7 @@ class Table extends AbstractAsset
             : $this->_generateIdentifierName(
                 array_merge((array) $this->getName(), $constraint->getLocalColumns()),
                 'fk',
-                $this->_getMaxIdentifierLength(),
+                $this->maxIdentifierLength,
             );
 
         $name = $this->normalizeIdentifier($name);
@@ -765,7 +734,7 @@ class Table extends AbstractAsset
         $indexName = $this->_generateIdentifierName(
             array_merge([$this->getName()], $constraint->getLocalColumns()),
             'idx',
-            $this->_getMaxIdentifierLength(),
+            $this->maxIdentifierLength,
         );
 
         $indexCandidate = $this->_createIndex($constraint->getLocalColumns(), $indexName, false, false);
