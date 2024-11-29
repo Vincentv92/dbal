@@ -59,6 +59,13 @@ all drivers and middleware.
 
 # Upgrade to 4.3
 
+## Deprecated configuration-related `Table` methods
+
+The `Table::setSchemaConfig()` method and `$_schemaConfig` property have been deprecated. Pass a `TableConfiguration`
+instance to the constructor instead.
+
+The `Table::_getMaxIdentifierLength()` method has been deprecated.
+
 ## Deprecated `AbstractAsset::_setName()`
 
 Setting object name via `AbstractAsset::_setName()` has been deprecated. Pass the name to the `AbstractAsset`

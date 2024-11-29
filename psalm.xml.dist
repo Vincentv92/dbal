@@ -55,8 +55,24 @@
 
                 <!-- TODO for PHPUnit 11 -->
                 <referencedMethod name="PHPUnit\Framework\TestCase::iniSet"/>
+
+                <!--
+                    https://github.com/doctrine/dbal/pull/6635
+                    TODO: remove in 5.0.0
+                -->
+                <referencedMethod name="Doctrine\DBAL\Schema\Table::_getMaxIdentifierLength" />
+                <referencedMethod name="Doctrine\DBAL\Schema\Table::setSchemaConfig" />
             </errorLevel>
         </DeprecatedMethod>
+        <DeprecatedProperty>
+            <errorLevel type="suppress">
+                <!--
+                    https://github.com/doctrine/dbal/pull/6635
+                    TODO: remove in 5.0.0
+                -->
+                <referencedProperty name="Doctrine\DBAL\Schema\Table::$_schemaConfig" />
+            </errorLevel>
+        </DeprecatedProperty>
         <DocblockTypeContradiction>
             <errorLevel type="suppress">
                 <!--
