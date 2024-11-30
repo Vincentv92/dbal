@@ -8,6 +8,11 @@ awareness about deprecated code.
 
 # Upgrade to 5.0
 
+## BC BREAK: Removed support for altering `Table` configuration
+
+The `Table::setSchemaConfig()` and `::_getMaxIdentifierLength()` methods and the `Table::$_schemaConfig` property have
+been removed.
+
 ## BC BREAK: Removed `AbstractAsset::_setName()`
 
 The `AbstractAsset::_setName()` method has been removed.
