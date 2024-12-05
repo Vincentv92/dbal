@@ -151,6 +151,16 @@ class SQLiteSchemaManager extends AbstractSchemaManager
             $idx['primary']    = false;
             $idx['non_unique'] = ! $tableIndex['unique'];
 
+            if ($tableIndex['partial'] === 1) {
+                $idx['where'] = $this->connection->fetchOne(
+                    <<<'SQL'
+                    SELECT SUBSTR(sql, INSTR(sql, 'WHERE') + 6)
+                    FROM sqlite_master WHERE type = 'index' AND name = (?)
+                    SQL,
+                    [$keyName],
+                );
+            }
+
             $indexArray = $this->connection->fetchAllAssociative('SELECT * FROM PRAGMA_INDEX_INFO (?)', [$keyName]);
 
             foreach ($indexArray as $indexColumnRow) {

@@ -987,4 +987,9 @@ class SQLitePlatform extends AbstractPlatform
     {
         return $identifier;
     }
+
+    public function supportsPartialIndexes(): bool
+    {
+        return true;
+    }
 }
