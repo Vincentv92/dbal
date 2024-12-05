@@ -413,4 +413,26 @@ SQL;
         $table = $this->schemaManager->introspectTable('table_with_comment');
         self::assertSame('This is a comment', $table->getComment());
     }
+
+    public function testPartialIndexes(): void
+    {
+        $offlineTable = new Table('person');
+        $offlineTable->addColumn('id', Types::INTEGER);
+        $offlineTable->addColumn('name', Types::STRING);
+        $offlineTable->addColumn('email', Types::STRING);
+        $offlineTable->addUniqueIndex(['id', 'name'], 'simple_partial_index', ['where' => '(id IS NULL)']);
+
+        $this->dropAndCreateTable($offlineTable);
+
+        $onlineTable = $this->schemaManager->introspectTable('person');
+
+        self::assertTrue(
+            $this->schemaManager->createComparator()
+                ->compareTables($offlineTable, $onlineTable)
+                ->isEmpty(),
+        );
+        self::assertTrue($onlineTable->hasIndex('simple_partial_index'));
+        self::assertTrue($onlineTable->getIndex('simple_partial_index')->hasOption('where'));
+        self::assertSame('(id IS NULL)', $onlineTable->getIndex('simple_partial_index')->getOption('where'));
+    }
 }
