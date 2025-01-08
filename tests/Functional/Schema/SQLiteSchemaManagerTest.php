@@ -435,4 +435,31 @@ SQL;
         self::assertTrue($onlineTable->getIndex('simple_partial_index')->hasOption('where'));
         self::assertSame('(id IS NULL)', $onlineTable->getIndex('simple_partial_index')->getOption('where'));
     }
+
+    public function testPartialIndexWhenIndexCreatedLowercase(): void
+    {
+        $offlineTable = new Table('person');
+        $offlineTable->addColumn('id', Types::INTEGER);
+        $offlineTable->addColumn('name', Types::STRING);
+        $offlineTable->addColumn('email', Types::STRING);
+
+        $this->dropAndCreateTable($offlineTable);
+        $this->connection->executeStatement(
+            <<<'SQL'
+            CREATE UNIQUE INDEX simple_partial_index ON person (id, name) where (id IS NULL)
+            SQL,
+        );
+
+        $onlineTable = $this->schemaManager->introspectTable('person');
+
+        self::assertSame(
+            'simple_partial_index',
+            $this->schemaManager->createComparator()
+                ->compareTables($offlineTable, $onlineTable)
+                ->getAddedIndexes()['simple_partial_index']->getName(),
+        );
+        self::assertTrue($onlineTable->hasIndex('simple_partial_index'));
+        self::assertTrue($onlineTable->getIndex('simple_partial_index')->hasOption('where'));
+        self::assertSame('(id IS NULL)', $onlineTable->getIndex('simple_partial_index')->getOption('where'));
+    }
 }
