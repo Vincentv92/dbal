@@ -154,7 +154,7 @@ class SQLiteSchemaManager extends AbstractSchemaManager
             if ($tableIndex['partial'] === 1) {
                 $idx['where'] = $this->connection->fetchOne(
                     <<<'SQL'
-                    SELECT SUBSTR(sql, INSTR(sql, 'WHERE') + 6)
+                    SELECT SUBSTR(sql, INSTR(lower(sql), 'where ') + LENGTH('where '))
                     FROM sqlite_master WHERE type = 'index' AND name = (?)
                     SQL,
                     [$keyName],
